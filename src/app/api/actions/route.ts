@@ -15,17 +15,26 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { create } from "domain";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const GET = async (req: Request) => {
-  const data = { message: "This is a GET response" };
   const payload: ActionGetResponse = {
     icon: new URL("/", new URL(req.url).origin).toString(),
-    label: "Send Memo",
+    label: "Donate",
     description: "Send a memo to the Solana network",
-    title: "Send Memo",
+    title: "Donate Solana to me",
+    links: {
+      actions: [
+        {
+          label: "Donate 0.1 SOL",
+          href: "/api/actions/purchase-tshirt?amount=small",
+        },
+        {
+          label: "Donate 1 SOL",
+          href: "/api/actions/purchase-tshirt?amount=big",
+        },
+      ],
+    },
   };
   return NextResponse.json(payload, {
     // The line headers: ACTIONS_CORS_HEADERS is used to include CORS headers in the response, allowing cross-origin requests from other domains, because blinks are embedded everywhere, so the requests can be fired from anyhwere
@@ -40,7 +49,7 @@ export const OPTIONS = GET;
 
 export const POST = async (req: Request) => {
   const body: ActionPostRequest = await req.json();
-
+  console.log("POST request is fired");
   let account: PublicKey;
   try {
     account = new PublicKey(body.account);
@@ -50,10 +59,6 @@ export const POST = async (req: Request) => {
       headers: ACTIONS_CORS_HEADERS,
     });
   }
-
-  // Process the POST data here (e.g., save to database)
-  // For example, assume we're just returning the received data
-  const response = { receivedData: body };
 
   try {
     const transaction = new Transaction();
