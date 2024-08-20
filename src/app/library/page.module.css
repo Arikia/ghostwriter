@@ -1,0 +1,71 @@
+
+.page {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: #032a34;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filters {
+    margin-bottom: 20px;
+    background-color: #34495e;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .filter {
+    margin-bottom: 10px;
+  }
+  
+  .filter label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .filter input,
+  .filter select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1 1 calc(33.333% - 20px); /* Responsive card width */
+    max-width: calc(33.333% - 20px);
+  }
+  
+  .card h2 {
+    font-size: 20px;
+    margin-top: 0;
+  }
+  
+  .card p {
+    margin: 10px 0;
+    color: #555;
+  }
+  
