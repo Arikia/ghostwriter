@@ -18,7 +18,7 @@ const Page: React.FC = () => {
   const [filters, setFilters] = useState({
     lastName: '',
     subject: '',
-    id: ''
+    price: ''
   });
 
   // Fetch articles from the local JSON file
@@ -52,10 +52,13 @@ const Page: React.FC = () => {
       );
     }
 
-    if (filters.id) {
-      filtered = filtered.filter(article => 
-        article.id.toString().includes(filters.id)
-      );
+    if (filters.price) {
+      const maxPrice = parseFloat(filters.price);
+      if (!isNaN(maxPrice)) {
+        filtered = filtered.filter(article => 
+          article.price <= maxPrice
+        );
+      }
     }
 
     setFilteredArticles(filtered);
@@ -71,7 +74,7 @@ const Page: React.FC = () => {
       <div className={styles.sidebar}>
         <div className={styles.filters}>
           <div className={styles.filter}>
-            <label htmlFor="lastName">Author Last Name</label>
+            <label htmlFor="lastName">Author's last name</label>
             <input
               type="text"
               id="lastName"
@@ -89,15 +92,17 @@ const Page: React.FC = () => {
             />
           </div>
           <div className={styles.filter}>
-            <label htmlFor="id">ID</label>
+            <label htmlFor="price">Max price</label>
             <input
               type="text"
-              id="id"
-              value={filters.id}
-              onChange={(e) => setFilters({ ...filters, id: e.target.value })}
+              id="price"
+              value={filters.price}
+              onChange={(e) => setFilters({ ...filters, price: e.target.value })}
             />
           </div>
-          <button onClick={applyFilters}>Apply Filters</button>
+          <button onClick={applyFilters} className={styles.button}>
+  Apply Filters
+</button>
         </div>
       </div>
       <div className={styles.content}>
@@ -106,7 +111,7 @@ const Page: React.FC = () => {
             <div key={article.id} className={styles.card}>
               <h2>{article.title}</h2>
               <p><strong>Author:</strong> {article.author_first_name} {article.author_last_name}</p>
-              <p>{article.text}</p>
+              <p>{article.First_part}</p>
               <p><strong>Price:</strong> ${article.price}</p>
             </div>
           ))}
