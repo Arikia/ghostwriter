@@ -52,10 +52,19 @@ export const GET = async (req: Request) => {
 // If the GET handler is already handling the necessary CORS headers, using it for OPTIONS ensures that preflight requests get those headers without duplicating code.
 export const OPTIONS = GET;
 
-// how to create a dev wallet
-// setup env
-// how to make the post request action compatible
+// NFT image https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png
+
+// change POST route to make it an action, follow nicks example
 // call the endpoint with the right data (json with timestamp, publisher etc.)
+// input GET requests blink with form input UI
+// move the button up
+
+// some developer readme
+// double licenses (can also be done by you girls)
+// handover? e.g. checkin with emily if she can run the code, if not, make a screenrecording
+// screen recording
+
+// register action endpoint (OPTIONAL)
 
 export async function POST(request: Request) {
   try {
@@ -65,7 +74,7 @@ export async function POST(request: Request) {
 
     // Load our dev wallet
     const secretKey = Uint8Array.from(
-      JSON.parse(process.env.SOLANA_SECRET_KEY!)
+      JSON.parse(process.env.DEV_WALLET_SECRET_KEY!)
     );
     const wallet = Keypair.fromSecretKey(secretKey);
 
