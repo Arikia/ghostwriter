@@ -9,13 +9,30 @@ import {
   MEMO_PROGRAM_ID,
 } from "@solana/actions";
 import {
-  ComputeBudgetProgram,
-  Connection,
-  PublicKey,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import {
+  Metaplex,
+  keypairIdentity,
+  bundlrStorage,
+} from "@metaplex-foundation/js";
+import { Connection, Keypair } from "@solana/web3.js";
 import { NextResponse } from "next/server";
+
+// Set up your Solana connection
+const connection = new Connection("https://api.devnet.solana.com"); // or use devnet/testnet
+
+// Load our dev wallet
+const secretKey = Uint8Array.from(JSON.parse(process.env.SOLANA_SECRET_KEY!));
+const wallet = Keypair.fromSecretKey(secretKey);
+
+// Set up Metaplex
+const metaplex = Metaplex.make(connection)
+  .use(keypairIdentity(wallet))
+  .use(bundlrStorage()); // For storing metadata on Arweave
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
@@ -47,53 +64,48 @@ export const GET = async (req: Request) => {
 // If the GET handler is already handling the necessary CORS headers, using it for OPTIONS ensures that preflight requests get those headers without duplicating code.
 export const OPTIONS = GET;
 
-export const POST = async (req: Request) => {
-  const body: ActionPostRequest = await req.json();
-  console.log("POST request is fired");
-  let account: PublicKey;
+export async function POST(request: Request) {
   try {
-    account = new PublicKey(body.account);
-  } catch (error) {
-    return NextResponse.json("Invalid account provided", {
-      status: 400,
-      headers: ACTIONS_CORS_HEADERS,
-    });
-  }
+    const { recipientAddress, nftData } = await request.json();
 
-  try {
-    const transaction = new Transaction();
-    transaction.add(
-      // createPostResponse required at least 1 non-memo instruction
-      ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1000,
-      }),
-
-      new TransactionInstruction({
-        programId: new PublicKey(MEMO_PROGRAM_ID),
-        data: Buffer.from("this is a message", "utf8"),
-        keys: [],
-      })
+    // Step 1: Create the mint for the NFT (SPL token with 0 decimals)
+    const mint = await createMint(
+      connection,
+      wallet,
+      wallet.publicKey,
+      null,
+      0 // Decimals: 0 for NFTs
     );
 
-    transaction.feePayer = account;
-
-    const connection = new Connection("https://api.devnet.solana.com");
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
-
-    const payload: ActionPostResponse = await createPostResponse({
-      fields: { transaction },
+    // Step 2: Upload the metadata to Arweave (or IPFS)
+    const { uri } = await metaplex.nfts().uploadMetadata({
+      name: nftData.name,
+      symbol: nftData.symbol,
+      description: nftData.description,
+      image: nftData.image, // URL to the image (either upload first or reference)
+      attributes: nftData.attributes || [],
     });
 
-    return NextResponse.json(payload, {
-      status: 201,
-      headers: ACTIONS_CORS_HEADERS,
+    // Step 3: Use Metaplex to create the NFT with the uploaded metadata
+    const { nft } = await metaplex.nfts().create({
+      mint,
+      uri,
+      name: nftData.name,
+      sellerFeeBasisPoints: 500, // e.g., 5% royalties
+      updateAuthority: wallet.publicKey,
+    });
+
+    // Respond with success
+    return NextResponse.json({
+      success: true,
+      mintAddress: mint.toBase58(),
+      metadataUri: uri,
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: "An unknown error occured" },
-      { status: 400 }
+      { success: false, error: error.message },
+      { status: 500 }
     );
   }
-};
+}
