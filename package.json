@@ -9,12 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bundlr-network/client": "^0.11.17",
     "@dialectlabs/blinks": "^0.8.0",
     "@metaplex-foundation/js": "^0.20.1",
     "@solana/actions": "^1.6.1",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.2",
     "@tiplink/api": "^0.2.7",
+    "iconv-lite": "^0.6.3",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18"

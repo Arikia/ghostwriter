@@ -17,22 +17,10 @@ import {
 import {
   Metaplex,
   keypairIdentity,
-  bundlrStorage,
+  irysStorage,
 } from "@metaplex-foundation/js";
 import { Connection, Keypair } from "@solana/web3.js";
 import { NextResponse } from "next/server";
-
-// Set up your Solana connection
-const connection = new Connection("https://api.devnet.solana.com"); // or use devnet/testnet
-
-// Load our dev wallet
-const secretKey = Uint8Array.from(JSON.parse(process.env.SOLANA_SECRET_KEY!));
-const wallet = Keypair.fromSecretKey(secretKey);
-
-// Set up Metaplex
-const metaplex = Metaplex.make(connection)
-  .use(keypairIdentity(wallet))
-  .use(bundlrStorage()); // For storing metadata on Arweave
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
@@ -64,11 +52,37 @@ export const GET = async (req: Request) => {
 // If the GET handler is already handling the necessary CORS headers, using it for OPTIONS ensures that preflight requests get those headers without duplicating code.
 export const OPTIONS = GET;
 
+// how to create a dev wallet
+// setup env
+// how to make the post request action compatible
+// call the endpoint with the right data (json with timestamp, publisher etc.)
+
 export async function POST(request: Request) {
   try {
     const { recipientAddress, nftData } = await request.json();
+    // Set up your Solana connection
+    const connection = new Connection("https://api.devnet.solana.com"); // or use devnet/testnet
 
-    // Step 1: Create the mint for the NFT (SPL token with 0 decimals)
+    // Load our dev wallet
+    const secretKey = Uint8Array.from(
+      JSON.parse(process.env.SOLANA_SECRET_KEY!)
+    );
+    const wallet = Keypair.fromSecretKey(secretKey);
+
+    // Set up Metaplex
+    const metaplex = Metaplex.make(connection)
+      .use(keypairIdentity(wallet))
+      .use(
+        irysStorage({
+          address: "https://devnet.irys.xyz",
+          providerUrl: "https://api.devnet.solana.com",
+          timeout: 60000,
+        })
+      );
+
+    console.log("------------", { connection, secretKey, wallet, metaplex });
+
+    // // Step 1: Create the mint for the NFT (SPL token with 0 decimals)
     const mint = await createMint(
       connection,
       wallet,
@@ -77,22 +91,25 @@ export async function POST(request: Request) {
       0 // Decimals: 0 for NFTs
     );
 
+    console.log({ mint });
+
+    // this is what is stored off chain
     // Step 2: Upload the metadata to Arweave (or IPFS)
     const { uri } = await metaplex.nfts().uploadMetadata({
       name: nftData.name,
       symbol: nftData.symbol,
       description: nftData.description,
       image: nftData.image, // URL to the image (either upload first or reference)
-      attributes: nftData.attributes || [],
+      attributes: nftData.attributes || [], // here goes all our license related data! (e.g. "license": "CC BY-SA 4.0")
     });
 
+    // this is what is stored on chain
     // Step 3: Use Metaplex to create the NFT with the uploaded metadata
     const { nft } = await metaplex.nfts().create({
-      mint,
       uri,
       name: nftData.name,
       sellerFeeBasisPoints: 500, // e.g., 5% royalties
-      updateAuthority: wallet.publicKey,
+      updateAuthority: wallet,
     });
 
     // Respond with success
@@ -102,9 +119,11 @@ export async function POST(request: Request) {
       metadataUri: uri,
     });
   } catch (error) {
-    console.error(error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    console.error(errorMessage);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
