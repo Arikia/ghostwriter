@@ -1,0 +1,29 @@
+/* team.module.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+  }
+  
+  .heading {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .listItem {
+    color: #666;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  
+  .listItem strong {
+    color: #333;
+  }

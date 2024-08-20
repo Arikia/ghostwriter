@@ -39,7 +39,7 @@ export default function Home() {
         </a>
 
         <a
-          href=""
+          href="/library"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
           target="_blank"
           rel="noopener noreferrer"
@@ -73,7 +73,7 @@ export default function Home() {
         </a>
 
         <a
-          href=""
+          href="/team"
           className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
           target="_blank"
           rel="noopener noreferrer"
@@ -96,9 +96,9 @@ export default function Home() {
 
 <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
   <a
-    className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
+    className="flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
     // link to some info page, copyright, ...?
-    href=""
+    href="https://ctrlx.world/"
     target="_blank"
     rel="noopener noreferrer"
   >

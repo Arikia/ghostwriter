@@ -9,9 +9,9 @@ export default function Navbar() {
   <img src="/ctrlxicon.png" alt="CTRL+x Icon" className="h-8 w-8" />
 </div>
   <div className="space-x-4">
-    <a href="#home" className="text-gray-300 hover:text-white"></a>
-    <a href="#about" className="text-gray-300 hover:text-white">About</a>
-    <a href="#services" className="text-gray-300 hover:text-white">Library</a>
+    <a href="/" className="text-gray-300 hover:text-white">Home</a>
+    <a href="/about" className="text-gray-300 hover:text-white">About</a>
+    <a href="/library" className="text-gray-300 hover:text-white">Library</a>
     <a href="#contact" className="text-gray-300 hover:text-white">Licence</a>
   </div>
 </div>
