@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "author_first_name": "Arikia",
+    "author_last_name": "Millikan",
+    "title": "Parrots are not stochastic and neither are you",
+    "First_part": "Like humans, parrots comprehend. They understand options and make choices based on comprehension. While the stochastic output of an LLM can seem like an entity deciding or exercising creative thought patterns, it’s just an algorithm running on a computer.",
+    "publication": "Content-technologies",
+    "price": 10
+  },
+  {
+    "id": 2,
+    "author_first_name": "John",
+    "author_last_name": "Doe",
+    "title": "Non-paranoia-inducing digital safety for brands and content professionals",
+    "First_part": "Whether you’re deploying a digital content campaign to tens of thousands of customers or managing content production, you need security protocols around user account management, access control, and authentication.",
+    "publication": "Content-technologies",
+    "price": 12
+  },
+  {
+    "id": 3,
+    "author_first_name": "John",
+    "author_last_name": "Doe",
+    "title": "How Berlin’s club scene is weathering the pandemic",
+    "First_part": "Nearly two years into COVID-19, the city’s recently reopened nightspots try to dance their way to a healthy Club Kultur.",
+    "publication": "National Geographic",
+    "price": 11
+  },
+  {
+    "id": 4,
+    "author_first_name": "Max",
+    "author_last_name": "Mustermann",
+    "title": "Scientists find weird new property of matter that breaks all the rules",
+    "First_part": "When physicists discover new properties of matter, it usually means better technologies for the rest of us. Superconductors, liquid crystal displays like the ones found in most TVs now, medical imaging technologies that allow doctors to peer inside the human body, and magnetic levitation — which was used to create the Shanghai Maglev train — are all examples of how discoveries of new properties of matter have resulted in revolutionary products.",
+    "publication": "The Verge",
+    "price": 7
+  },
+  {
+    "id": 5,
+    "author_first_name": "Arikia",
+    "author_last_name": "Millikan",
+    "title": "GIANT SQUID! TO CATCH A MONSTER, BRING PATIENCE AND PLENTY OF CASH",
+    "First_part": "Giant squid – also known also by their scientific name Architeuthis – have been the stuff of both legend and science for hundreds of years. Stories of great tentacled Kraken in Scandinavia and in the scientific writings of Pliny the Elder are some of the earliest indications that such monsters were thought to exist. Giant squid have also left evidence of their existence tangled up in fishing nets and washed ashore all over the world. Despite their massive size (adults can grow up to about 40 feet from tip to tentacle and weigh up to 610 pounds) searching for them has been a needle-in-a-haystack endeavor.",
+    "publication": "The Verge",
+    "price": 8
+  },
+  {
+    "id": 6,
+    "author_first_name": "John",
+    "author_last_name": "Doe",
+    "title": "Why is Bigfoot eating bagels?",
+    "First_part": "Three weeks ago, a Texas-based geneticist created a media spectacle by claiming to have sequenced the DNA of the mythical Bigfoot, in what is most certainly either an act of purposeful deception or unintentional stupidity, with a small sprinkle of a possibility of the claim being the truth.",
+    "publication": "The Verge",
+    "price": 10
+  },
+  {
+    "id": 7,
+    "author_first_name": "Max",
+    "author_last_name": "Mustermann",
+    "title": "LadyBits’ First and Last Year on Medium",
+    "First_part": "In May of 2013, I signed on as a Collection Editor with Medium to launch LadyBits on Medium. It has been a thrilling experiment in new media publishing, business management, brand development, and technological creativity. Now, a little over a year later, Medium and I have mutually decided to bring our collaboration to a close. This will be the last LadyBits post on Medium.",
+    "publication": "The Verge",
+    "price": 12
+  }
+]
