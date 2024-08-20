@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dialectlabs/blinks": "^0.8.0",
     "@solana/actions": "^1.6.1",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.95.2",
     "@tiplink/api": "^0.2.7",
     "next": "14.2.5",
