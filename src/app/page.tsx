@@ -15,8 +15,8 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col items-center justify-center text-center mt-16">
-        <h2 className="text-4xl font-bold mb-4">Protect your text content</h2>
-        <h3 className="text-xl font-bold opacity-50 mb-4">Mint an NFT</h3>
+        <h2 className="text-4xl font-bold mb-4">Establish journalistic provenance with blockchain licensing</h2>
+        {/* <h3 className="text-xl font-bold opacity-50 mb-4">Establish journalistic provenance with blockchain licensing</h3> */}
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
