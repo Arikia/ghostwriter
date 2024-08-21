@@ -48,7 +48,7 @@ bun dev
 
 ## Tech Stack
 
-- **Next.js** - React framework for building user interfaces.
+- **Next.js** - React framework for building user interfaces and use api routes to create the Solana actions for Blink.
 - **TypeScript** - For type safety and code clarity.
 - **Blink (Solana)** - Blockchain link that turns any Solana action into a shareable, metadata-rich link.
 - **Metaplex** - OS NFT protocol for minting and managing NFTs.
