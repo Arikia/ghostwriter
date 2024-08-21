@@ -53,9 +53,10 @@ bun dev
 - **Blink (Solana)** - Blockchain link that turns any Solana action into a shareable, metadata-rich link.
 - **Metaplex** - OS NFT protocol for minting and managing NFTs.
 - **Phantom Wallet** - A popular NFT wallet for Solana-based assets.
-- **Filecoin** - A decentralized data storage network designed to store humanity’s most important information.
 
-*(Future Enhancement: Integration with Tiplink for wallet connection.)*
+*(Future Enhancement: 
+Integration with Tiplink for wallet connection. 
+Metaplex - OS NFT protocol for minting and managing NFTs.)*
 
 ## Team
 

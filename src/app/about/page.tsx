@@ -5,8 +5,7 @@ const AboutPage = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.heading1}>Web3 Hackathon CTRL+X Project</h1>
-      <h2 className={styles.heading2}>CTRL+X</h2>
-      <p className={styles.paragraph}>Decentralizing the Future of Digital Publishing</p>
+      <p className={styles.heading1}>Decentralizing the Future of Digital Publishing</p>
 
       <h3 className={styles.heading3}>Project: The CTRL+X Blocklicense</h3>
       <p className={styles.paragraph}>
