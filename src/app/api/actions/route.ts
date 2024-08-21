@@ -41,7 +41,7 @@ export const GET = async (req: Request) => {
       actions: [
         {
           label: "Mint NFT", // button text
-          href: "/api/actions?recipientAddress={recipientAddress}",
+          href: "/api/actions",
         },
       ],
     },
