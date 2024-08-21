@@ -19,24 +19,29 @@ import {
   keypairIdentity,
   irysStorage,
 } from "@metaplex-foundation/js";
-import { Connection, Keypair } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { NextResponse } from "next/server";
+import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
+import {
+  generateSigner,
+  createSignerFromKeypair,
+  signerIdentity,
+  createNoopSigner,
+  publicKey,
+} from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
-    icon: new URL("/", new URL(req.url).origin).toString(),
-    label: "Donate",
+    icon: "https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png",
+    label: "Mint NFT",
     description: "Send a memo to the Solana network",
-    title: "Donate Solana to me",
+    title: "Mint NFT",
     links: {
       actions: [
         {
-          label: "Donate 0.1 SOL",
-          href: "/api/actions/purchase-tshirt?amount=small",
-        },
-        {
-          label: "Donate 1 SOL",
-          href: "/api/actions/purchase-tshirt?amount=big",
+          label: "Mint NFT", // button text
+          href: "/api/actions?recipientAddress={recipientAddress}",
         },
       ],
     },
@@ -52,13 +57,13 @@ export const GET = async (req: Request) => {
 // If the GET handler is already handling the necessary CORS headers, using it for OPTIONS ensures that preflight requests get those headers without duplicating code.
 export const OPTIONS = GET;
 
-// NFT image https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png
-
 // change POST route to make it an action, follow nicks example
 // call the endpoint with the right data (json with timestamp, publisher etc.)
 // input GET requests blink with form input UI
+// use the blink sdk to show the form
 // move the button up
 
+// confetti on success
 // some developer readme
 // double licenses (can also be done by you girls)
 // handover? e.g. checkin with emily if she can run the code, if not, make a screenrecording
@@ -66,74 +71,56 @@ export const OPTIONS = GET;
 
 // register action endpoint (OPTIONAL)
 
-export async function POST(request: Request) {
+export const POST = async (req: Request) => {
+  const request = await req.json();
+
+  let recipientAddress;
   try {
-    const { recipientAddress, nftData } = await request.json();
-    // Set up your Solana connection
-    const connection = new Connection("https://api.devnet.solana.com"); // or use devnet/testnet
-
-    // Load our dev wallet
-    const secretKey = Uint8Array.from(
-      JSON.parse(process.env.DEV_WALLET_SECRET_KEY!)
-    );
-    const wallet = Keypair.fromSecretKey(secretKey);
-
-    // Set up Metaplex
-    const metaplex = Metaplex.make(connection)
-      .use(keypairIdentity(wallet))
-      .use(
-        irysStorage({
-          address: "https://devnet.irys.xyz",
-          providerUrl: "https://api.devnet.solana.com",
-          timeout: 60000,
-        })
-      );
-
-    console.log("------------", { connection, secretKey, wallet, metaplex });
-
-    // // Step 1: Create the mint for the NFT (SPL token with 0 decimals)
-    const mint = await createMint(
-      connection,
-      wallet,
-      wallet.publicKey,
-      null,
-      0 // Decimals: 0 for NFTs
-    );
-
-    console.log({ mint });
-
-    // this is what is stored off chain
-    // Step 2: Upload the metadata to Arweave (or IPFS)
-    const { uri } = await metaplex.nfts().uploadMetadata({
-      name: nftData.name,
-      symbol: nftData.symbol,
-      description: nftData.description,
-      image: nftData.image, // URL to the image (either upload first or reference)
-      attributes: nftData.attributes || [], // here goes all our license related data! (e.g. "license": "CC BY-SA 4.0")
-    });
-
-    // this is what is stored on chain
-    // Step 3: Use Metaplex to create the NFT with the uploaded metadata
-    const { nft } = await metaplex.nfts().create({
-      uri,
-      name: nftData.name,
-      sellerFeeBasisPoints: 500, // e.g., 5% royalties
-      updateAuthority: wallet,
-    });
-
-    // Respond with success
-    return NextResponse.json({
-      success: true,
-      mintAddress: mint.toBase58(),
-      metadataUri: uri,
-    });
+    recipientAddress = new PublicKey(request.account);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "An unknown error occurred";
-    console.error(errorMessage);
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
+    return new Response("Invalid account address", {
+      status: 400,
+      headers: ACTIONS_CORS_HEADERS,
+    });
   }
-}
+  const transaction = await prepareTransaction(new PublicKey(recipientAddress));
+
+  const response: ActionPostResponse = {
+    transaction: Buffer.from(transaction).toString("base64"),
+  };
+
+  return NextResponse.json(response, {
+    headers: ACTIONS_CORS_HEADERS,
+  });
+};
+
+const prepareTransaction = async (recipientAddress: PublicKey) => {
+  const umi = createUmi("https://api.devnet.solana.com", "confirmed");
+  let keypair = umi.eddsa.createKeypairFromSecretKey(
+    new Uint8Array(JSON.parse(process.env.DEV_WALLET_SECRET_KEY!))
+  );
+
+  const adminSigner = createSignerFromKeypair(umi, keypair);
+  umi.use(signerIdentity(createNoopSigner(publicKey(recipientAddress))));
+
+  // Generate the Asset KeyPair
+  const asset = generateSigner(umi);
+  console.log("This is your asset address", asset.publicKey.toString());
+
+  // Pass and Fetch the Collection
+  const collection = await fetchCollection(
+    umi,
+    publicKey(process.env.COLLECTION_PUBKEY!)
+  );
+  console.log(collection);
+
+  const tx = await create(umi, {
+    asset,
+    collection,
+    name: "CTRL+X License",
+    uri: "https://ctrlx.world",
+    authority: adminSigner,
+  }).buildAndSign(umi);
+
+  return umi.transactions.serialize(tx);
+};
