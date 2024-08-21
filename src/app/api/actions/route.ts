@@ -30,6 +30,7 @@ import {
   publicKey,
 } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { base64 } from "@metaplex-foundation/umi/serializers";
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
@@ -83,9 +84,12 @@ export const POST = async (req: Request) => {
       headers: ACTIONS_CORS_HEADERS,
     });
   }
-  const transaction = await prepareTransaction(new PublicKey(recipientAddress));
 
+  let transaction = await prepareTransaction(new PublicKey(recipientAddress));
+
+  const serializedCreateAssetTxAsString = base64.deserialize(transaction)[0];
   const response: ActionPostResponse = {
+    // transaction: serializedCreateAssetTxAsString,
     transaction: Buffer.from(transaction).toString("base64"),
   };
 
@@ -101,6 +105,7 @@ const prepareTransaction = async (recipientAddress: PublicKey) => {
   );
 
   const adminSigner = createSignerFromKeypair(umi, keypair);
+  // umi.use(signerIdentity(adminSigner));
   umi.use(signerIdentity(createNoopSigner(publicKey(recipientAddress))));
 
   // Generate the Asset KeyPair
@@ -114,12 +119,14 @@ const prepareTransaction = async (recipientAddress: PublicKey) => {
   );
   console.log(collection);
 
-  const tx = await create(umi, {
+  let tx = await create(umi, {
     asset,
     collection,
     name: "CTRL+X License",
     uri: "https://ctrlx.world",
     authority: adminSigner,
+    // owner: publicKey(recipientAddress),
+    // payer: adminSigner,
   }).buildAndSign(umi);
 
   return umi.transactions.serialize(tx);
