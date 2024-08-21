@@ -1,0 +1,51 @@
+/* about.module.css */
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+  }
+  
+  .heading1 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .heading2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .heading3 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .heading4 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .paragraph {
+    color: #666;
+    font-size: 1.2em;
+    margin-bottom: 20px;
+  }
+  
+  .list {
+    list-style-type: disc;
+    margin-left: 20px;
+  }
+  
+  .listItem {
+    color: #666;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  
+  .link {
+    color: #1a0dab;
+    text-decoration: none;
+  }

@@ -1,0 +1,100 @@
+
+.page {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+  }
+  
+  .sidebar {
+    width: 250px;
+    background-color: #487aab;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filters {
+    margin-bottom: 20px;
+    background-color: #404f5f;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .filter {
+    margin-bottom: 10px;
+  }
+  
+  .filter label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .filters input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc; /* Border color */
+    border-radius: 4px;
+    background-color: #f8f8f8; /* Background color */
+    color: #333; /* Text color */
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .filters input:focus {
+    background-color: #fff; /* Background color on focus */
+    color: #000; /* Text color on focus */
+    outline: none; /* Remove default focus outline */
+    border-color: #007bff; /* Border color on focus */
+  }
+  
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1 1 calc(33.333% - 20px); /* Responsive card width */
+    max-width: calc(33.333% - 20px);
+  }
+  
+  .card h2 {
+    font-size: 20px;
+    margin-top: 0;
+  }
+  
+  .card p {
+    margin: 10px 0;
+    color: #555;
+  }
+  
+  .button {
+    background-color: #487aab;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    text-decoration: solid;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    background-color: #555;
+  }
+  
