@@ -37,31 +37,7 @@ export const GET = async (req: Request) => {
     icon: "https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png",
     label: "License",
     description: "Mint your License NFT now",
-    title: "Mint NFT",
-    links: {
-      actions: [
-        {
-          label: "License", // button text
-          href: "/api/actions?title={title}",
-          parameters: [
-            {
-              name: "License", // field name
-              label: "Title of Article", // text input placeholder
-            },
-          ],
-        },
-        {
-          label: "License", // button text
-          href: "/api/actions?url={url}",
-          parameters: [
-            {
-              name: "License", // field name
-              label: "Url of Article", // text input placeholder
-            },
-          ],
-        },
-      ],
-    },
+    title: "License",
   };
   return NextResponse.json(payload, {
     // The line headers: ACTIONS_CORS_HEADERS is used to include CORS headers in the response, allowing cross-origin requests from other domains, because blinks are embedded everywhere, so the requests can be fired from anyhwere
