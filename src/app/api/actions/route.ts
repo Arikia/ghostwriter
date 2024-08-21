@@ -9,29 +9,56 @@ import {
   MEMO_PROGRAM_ID,
 } from "@solana/actions";
 import {
-  ComputeBudgetProgram,
-  Connection,
-  PublicKey,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
+  createMint,
+  getOrCreateAssociatedTokenAccount,
+  mintTo,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import {
+  Metaplex,
+  keypairIdentity,
+  irysStorage,
+} from "@metaplex-foundation/js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { NextResponse } from "next/server";
+import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
+import {
+  generateSigner,
+  createSignerFromKeypair,
+  signerIdentity,
+  createNoopSigner,
+  publicKey,
+} from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { base64 } from "@metaplex-foundation/umi/serializers";
 
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
-    icon: new URL("/", new URL(req.url).origin).toString(),
-    label: "Donate",
-    description: "Send a memo to the Solana network",
-    title: "Donate Solana to me",
+    icon: "https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png",
+    label: "License",
+    description: "Mint your License NFT now",
+    title: "Mint NFT",
     links: {
       actions: [
         {
-          label: "Donate 0.1 SOL",
-          href: "/api/actions/purchase-tshirt?amount=small",
+          label: "License", // button text
+          href: "/api/actions?title={title}",
+          parameters: [
+            {
+              name: "License", // field name
+              label: "Title of Article", // text input placeholder
+            },
+          ],
         },
         {
-          label: "Donate 1 SOL",
-          href: "/api/actions/purchase-tshirt?amount=big",
+          label: "License", // button text
+          href: "/api/actions?url={url}",
+          parameters: [
+            {
+              name: "License", // field name
+              label: "Url of Article", // text input placeholder
+            },
+          ],
         },
       ],
     },
@@ -47,53 +74,87 @@ export const GET = async (req: Request) => {
 // If the GET handler is already handling the necessary CORS headers, using it for OPTIONS ensures that preflight requests get those headers without duplicating code.
 export const OPTIONS = GET;
 
+// change POST route to make it an action, follow nicks example
+// call the endpoint with the right data (json with timestamp, publisher etc.)
+// input GET requests blink with form input UI
+// use the blink sdk to show the form
+// move the button up
+
+// confetti on success
+// some developer readme
+// double licenses (can also be done by you girls)
+// handover? e.g. checkin with emily if she can run the code, if not, make a screenrecording
+// screen recording
+
+// register action endpoint (OPTIONAL)
+
 export const POST = async (req: Request) => {
-  const body: ActionPostRequest = await req.json();
-  console.log("POST request is fired");
-  let account: PublicKey;
+  const request = await req.json();
+
+  let recipientAddress;
   try {
-    account = new PublicKey(body.account);
+    recipientAddress = new PublicKey(request.account);
   } catch (error) {
-    return NextResponse.json("Invalid account provided", {
+    return new Response("Invalid account address", {
       status: 400,
       headers: ACTIONS_CORS_HEADERS,
     });
   }
 
-  try {
-    const transaction = new Transaction();
-    transaction.add(
-      // createPostResponse required at least 1 non-memo instruction
-      ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1000,
-      }),
+  let transaction = await prepareTransaction(new PublicKey(recipientAddress));
 
-      new TransactionInstruction({
-        programId: new PublicKey(MEMO_PROGRAM_ID),
-        data: Buffer.from("this is a message", "utf8"),
-        keys: [],
-      })
-    );
+  const serializedCreateAssetTxAsString = base64.deserialize(transaction)[0];
+  const response: ActionPostResponse = {
+    // transaction: serializedCreateAssetTxAsString,
+    transaction: Buffer.from(transaction).toString("base64"),
+  };
 
-    transaction.feePayer = account;
+  return NextResponse.json(response, {
+    headers: ACTIONS_CORS_HEADERS,
+  });
+};
 
-    const connection = new Connection("https://api.devnet.solana.com");
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
+const prepareTransaction = async (recipientAddress: PublicKey) => {
+  const umi = createUmi("https://api.devnet.solana.com", "confirmed");
+  let keypair = umi.eddsa.createKeypairFromSecretKey(
+    new Uint8Array(JSON.parse(process.env.DEV_WALLET_SECRET_KEY!))
+  );
 
-    const payload: ActionPostResponse = await createPostResponse({
-      fields: { transaction },
-    });
+  const adminSigner = createSignerFromKeypair(umi, keypair);
+  // umi.use(signerIdentity(adminSigner));
+  umi.use(signerIdentity(createNoopSigner(publicKey(recipientAddress))));
 
-    return NextResponse.json(payload, {
-      status: 201,
-      headers: ACTIONS_CORS_HEADERS,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "An unknown error occured" },
-      { status: 400 }
-    );
-  }
+  // Generate the Asset KeyPair
+  const asset = generateSigner(umi);
+  console.log("This is your asset address", asset.publicKey.toString());
+
+  // Pass and Fetch the Collection
+  const collection = await fetchCollection(
+    umi,
+    publicKey(process.env.COLLECTION_PUBKEY!)
+  );
+  console.log(collection);
+
+  let tx = await create(umi, {
+    asset,
+    collection,
+    name: "CTRL+X License",
+    uri: "https://ctrlx.world",
+    authority: adminSigner,
+    // owner: publicKey(recipientAddress),
+    // payer: adminSigner,
+    // }).buildAndSign(umi);
+  }).getInstructions();
+
+  console.log({ tx });
+
+  const blockhash = await umi.rpc.getLatestBlockhash();
+  let createAssetTx = umi.transactions.create({
+    version: 0,
+    payer: publicKey(recipientAddress),
+    instructions: tx,
+    blockhash: blockhash.blockhash,
+  });
+
+  return umi.transactions.serialize(createAssetTx);
 };
