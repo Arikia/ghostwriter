@@ -15,7 +15,9 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col items-center justify-center text-center mt-16">
-        <h2 className="text-4xl font-bold mb-4">Establish journalistic provenance with blockchain licensing</h2>
+        <h2 className="text-4xl font-bold mb-4">
+          Establish journalistic provenance with blockchain licensing
+        </h2>
         {/* <h3 className="text-xl font-bold opacity-50 mb-4">Establish journalistic provenance with blockchain licensing</h3> */}
       </div>
 
@@ -70,19 +72,6 @@ export default function Home() {
             Find out more about the project idea.
           </p>
         </a>
-<<<<<<< HEAD
-      </div>
-
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            // link to some info page, copyright, ...?
-            href=""
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-=======
 
         <a
           href="/team"
@@ -100,12 +89,9 @@ export default function Home() {
             The hackathon team.
           </p>
         </a>
-
-
       </div>
 
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-
         <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
           <a
             className="flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
@@ -114,8 +100,6 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-
->>>>>>> main
             By{" "}
             <Image
               src="/ctrlxicon.png"
