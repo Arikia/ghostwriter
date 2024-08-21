@@ -35,14 +35,30 @@ import { base64 } from "@metaplex-foundation/umi/serializers";
 export const GET = async (req: Request) => {
   const payload: ActionGetResponse = {
     icon: "https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png",
-    label: "Mint NFT",
-    description: "Send a memo to the Solana network",
+    label: "License",
+    description: "Mint your License NFT now",
     title: "Mint NFT",
     links: {
       actions: [
         {
-          label: "Mint NFT", // button text
-          href: "/api/actions",
+          label: "License", // button text
+          href: "/api/actions?title={title}",
+          parameters: [
+            {
+              name: "License", // field name
+              label: "Title of Article", // text input placeholder
+            },
+          ],
+        },
+        {
+          label: "License", // button text
+          href: "/api/actions?url={url}",
+          parameters: [
+            {
+              name: "License", // field name
+              label: "Url of Article", // text input placeholder
+            },
+          ],
         },
       ],
     },
@@ -127,7 +143,18 @@ const prepareTransaction = async (recipientAddress: PublicKey) => {
     authority: adminSigner,
     // owner: publicKey(recipientAddress),
     // payer: adminSigner,
-  }).buildAndSign(umi);
+    // }).buildAndSign(umi);
+  }).getInstructions();
 
-  return umi.transactions.serialize(tx);
+  console.log({ tx });
+
+  const blockhash = await umi.rpc.getLatestBlockhash();
+  let createAssetTx = umi.transactions.create({
+    version: 0,
+    payer: publicKey(recipientAddress),
+    instructions: tx,
+    blockhash: blockhash.blockhash,
+  });
+
+  return umi.transactions.serialize(createAssetTx);
 };
