@@ -8,7 +8,7 @@ interface Article {
   author_first_name: string;
   author_last_name: string;
   title: string;
-  text: string;
+  First_part: string;
   price: number;
 }
 
@@ -55,7 +55,7 @@ const Page: React.FC = () => {
     if (filters.price) {
       const maxPrice = parseFloat(filters.price);
       if (!isNaN(maxPrice)) {
-        filtered = filtered.filter(article => 
+        filtered = filtered.filter(article =>
           article.price <= maxPrice
         );
       }
@@ -101,8 +101,8 @@ const Page: React.FC = () => {
             />
           </div>
           <button onClick={applyFilters} className={styles.button}>
-  Apply Filters
-</button>
+            Apply Filters
+          </button>
         </div>
       </div>
       <div className={styles.content}>
