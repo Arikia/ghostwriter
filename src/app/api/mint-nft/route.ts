@@ -1,3 +1,10 @@
+import fs from "fs";
+import path from "path";
+
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
 import {
   createGenericFile,
   generateSigner,
@@ -6,20 +13,15 @@ import {
   publicKey,
 } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
 import { base58 } from "@metaplex-foundation/umi/serializers";
 import {
   irysUploader,
   // @ts-ignore "type definitions are missing"
 } from "@metaplex-foundation/umi-uploader-irys";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import fs from "fs";
-import path from "path";
+
+import { encryptText } from "../../utils/encrypt";
 
 /* TODO:
--hash the text and save that to metadata
--set correct metadata 
 -protect the route with a secret key or sth.
 -validate the request body
 -what's with batch uploads?
@@ -27,7 +29,8 @@ import path from "path";
 
 export async function POST(req: NextRequest) {
   if (req.method === "POST") {
-    const { name } = await req.json(); // what to include in request body
+    const { author, title, text, published_at, published_where } =
+      await req.json(); // what to include in request body
 
     // const secretKey = new Uint8Array(
     //   process.env
@@ -41,7 +44,7 @@ export async function POST(req: NextRequest) {
     // console.log("Public Key:", ourPublicKey);
 
     // Validate required fields
-    if (!name) {
+    if (!author || !title || !text || !published_at || !published_where) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -109,20 +112,39 @@ export async function POST(req: NextRequest) {
         imageUri = "https://gateway.irys.xyz/" + uri[0].split("/").pop(); // https://arweave.net/id currently not working
       }
 
+      // Encrypt the text
+      const encryption = encryptText(text);
+
       // Generate Metadata
       const metadata = {
         name: "CTRL+X",
-        description: name,
+        description: title + "(Journalistic Content recorded through CTRL+X)",
         image: imageUri,
         external_url: "https://example.com",
         attributes: [
           {
-            trait_type: "trait1",
-            value: "value1",
+            trait_type: "author",
+            value: author,
           },
           {
-            trait_type: "trait2",
-            value: "value2",
+            trait_type: "title",
+            value: title,
+          },
+          {
+            trait_type: "published_at",
+            value: published_at,
+          },
+          {
+            trait_type: "published_where",
+            value: published_where,
+          },
+          {
+            trait_type: "encrypted_text",
+            value: encryption.encryptedText,
+          },
+          {
+            trait_type: "encryption_iv",
+            value: encryption.iv,
           },
         ],
         properties: {
@@ -144,7 +166,7 @@ export async function POST(req: NextRequest) {
       const tx = await create(umi, {
         asset,
         collection,
-        name: `${name} (Journalistic Content recorded through CTRL+X)`,
+        name: title,
         uri: metadataUri,
       }).sendAndConfirm(umi);
 

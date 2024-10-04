@@ -19,7 +19,7 @@ const Page = () => {
   const [jsonData, setJsonData] = useState<ExportExtract | null>(null);
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState<string>("No file selected");
-
+  console.log({ jsonData });
   const shortenedData = useMemo(() => {
     if (!jsonData) return null;
 

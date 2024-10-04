@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "create-collection": "ts-node src/scripts/createCollection.ts"
+    "create-collection": "ts-node src/scripts/createCollection.ts",
+    "create-secret": "ts-node src/scripts/createSecret.ts",
+    "test-encryption": "ts-node src/scripts/testEncryption.ts"
   },
   "dependencies": {
     "@bundlr-network/client": "^0.11.17",
