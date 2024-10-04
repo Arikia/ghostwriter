@@ -17,9 +17,9 @@ import {
   // @ts-ignore "type definitions are missing"
 } from "@metaplex-foundation/umi-uploader-irys";
 
-import { encryptText } from "../../utils/encrypt";
-import { createMetadata } from "@/app/utils/createMetadata";
-import { uploadNFTImageToArweave } from "@/app/utils/uploadToArweave";
+import { encryptText } from "@/app/utils/server/encrypt";
+import { createMetadata } from "@/app/utils/server/createMetadata";
+import { uploadNFTImageToArweave } from "@/app/utils/server/uploadToArweave";
 
 /* TODO:
 -protect the route with a secret key or sth.
