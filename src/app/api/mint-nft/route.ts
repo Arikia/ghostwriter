@@ -1,12 +1,10 @@
-import fs from "fs";
-import path from "path";
+import zlib from "zlib";
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
 import {
-  createGenericFile,
   generateSigner,
   createSignerFromKeypair,
   signerIdentity,
@@ -20,6 +18,8 @@ import {
 } from "@metaplex-foundation/umi-uploader-irys";
 
 import { encryptText } from "../../utils/encrypt";
+import { createMetadata } from "@/app/utils/createMetadata";
+import { uploadNFTImageToArweave } from "@/app/utils/uploadToArweave";
 
 /* TODO:
 -protect the route with a secret key or sth.
@@ -27,21 +27,21 @@ import { encryptText } from "../../utils/encrypt";
 -what's with batch uploads?
 */
 
+// const secretKey = new Uint8Array(
+//   process.env
+//     .DEV_WALLET_SECRET_KEY!.replace("[", "")
+//     .replace("]", "")
+//     .split(",")
+//     .map(Number)
+// );
+// const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
+// const ourPublicKey = keypair.publicKey.toString(); // Get the public key
+// console.log("Public Key:", ourPublicKey);
+
 export async function POST(req: NextRequest) {
   if (req.method === "POST") {
     const { author, title, text, published_at, published_where } =
       await req.json(); // what to include in request body
-
-    // const secretKey = new Uint8Array(
-    //   process.env
-    //     .DEV_WALLET_SECRET_KEY!.replace("[", "")
-    //     .replace("]", "")
-    //     .split(",")
-    //     .map(Number)
-    // );
-    // const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
-    // const ourPublicKey = keypair.publicKey.toString(); // Get the public key
-    // console.log("Public Key:", ourPublicKey);
 
     // Validate required fields
     if (!author || !title || !text || !published_at || !published_where) {
@@ -61,22 +61,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!process.env.DEV_WALLET_SECRET_KEY) {
+      throw new Error(
+        "DEV_WALLET_SECRET_KEY is not defined in the environment variables"
+      );
+    }
+
     try {
-      // Setup Umi
-      const umi = createUmi("https://api.devnet.solana.com", "finalized");
-
-      // Parse the DEV_WALLET_SECRET_KEY from the environment variable
-      const secretKeyString = process.env.DEV_WALLET_SECRET_KEY;
-      if (!secretKeyString) {
-        throw new Error(
-          "DEV_WALLET_SECRET_KEY is not defined in the environment variables"
-        );
-      }
-
-      // Parse the string into an array of numbers and then convert it into a Uint8Array
-      const secretKeyArray = JSON.parse(secretKeyString) as number[];
+      // Create Signer from Wallet Secret Key
+      const secretKeyArray = JSON.parse(
+        process.env.DEV_WALLET_SECRET_KEY
+      ) as number[];
       const secretKey = new Uint8Array(secretKeyArray);
-
+      const umi = createUmi("https://api.devnet.solana.com", "finalized");
       let keypair = umi.eddsa.createKeypairFromSecretKey(
         new Uint8Array(secretKey)
       );
@@ -96,67 +93,23 @@ export async function POST(req: NextRequest) {
       // Upload ctrl-x icon to arweave
       let imageUri = process.env.NFT_IMAGE_AW_URL;
       if (!imageUri) {
-        const imageFile = fs.readFileSync(
-          path.join(process.cwd(), "public", "ctrlxicon.png")
-        );
-
-        const umiImageFile = createGenericFile(imageFile, "ctrl-x.png", {
-          tags: [{ name: "Content-Type", value: "image/png" }],
-        });
-
-        // upload image to Arweave via Irys and get returned an uri
-        // address where the file is located -> imageUri[0]
-        const uri = await umi.uploader.upload([umiImageFile]).catch((err) => {
-          throw new Error(err);
-        });
-        imageUri = "https://gateway.irys.xyz/" + uri[0].split("/").pop(); // https://arweave.net/id currently not working
+        imageUri = await uploadNFTImageToArweave(umi);
       }
 
-      // Encrypt the text
-      const encryption = encryptText(text);
+      // Compress & Encrypt the text
+      // for decompressing: zlib.inflateSync(Buffer.from(compressedText, "base64")).toString();
+      const compressedText = zlib.deflateSync(text).toString("base64");
+      const encryption = encryptText(compressedText);
 
       // Generate Metadata
-      const metadata = {
-        name: "CTRL+X",
-        description: title + "(Journalistic Content recorded through CTRL+X)",
-        image: imageUri,
-        external_url: "https://example.com",
-        attributes: [
-          {
-            trait_type: "author",
-            value: author,
-          },
-          {
-            trait_type: "title",
-            value: title,
-          },
-          {
-            trait_type: "published_at",
-            value: published_at,
-          },
-          {
-            trait_type: "published_where",
-            value: published_where,
-          },
-          {
-            trait_type: "encrypted_text",
-            value: encryption.encryptedText,
-          },
-          {
-            trait_type: "encryption_iv",
-            value: encryption.iv,
-          },
-        ],
-        properties: {
-          files: [
-            {
-              uri: imageUri,
-              type: "image/png",
-            },
-          ],
-          category: "image",
-        },
-      };
+      const metadata = createMetadata({
+        title,
+        imageUri,
+        author,
+        published_at,
+        published_where,
+        encryption,
+      });
 
       // Upload Metadata
       const metadataUri = await umi.uploader.uploadJson(metadata);
@@ -180,8 +133,7 @@ export async function POST(req: NextRequest) {
         { status: 200 }
       );
     } catch (error) {
-      // @ts-ignore
-      console.log(error.message);
+      console.log({ error });
       return NextResponse.json({ error: "Mint failed" }, { status: 500 });
     }
   } else {

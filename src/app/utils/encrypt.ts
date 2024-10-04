@@ -1,12 +1,12 @@
 import crypto from "crypto";
 
-type Encrytion = {
+type Encryption = {
   iv: string;
   encryptedText: string;
 };
 
 // Encryption function using AES-256-CBC
-const encryptText = (articleText: string): Encrytion => {
+const encryptText = (articleText: string): Encryption => {
   if (!process.env.ENCRYPTION_KEY) {
     throw new Error(
       "ENCRYPTION_KEY is not defined in the environment variables"
@@ -34,7 +34,7 @@ const encryptText = (articleText: string): Encrytion => {
 };
 
 // Decryption function using AES-256-CBC
-const decryptText = (encryption: Encrytion) => {
+const decryptText = (encryption: Encryption) => {
   if (!process.env.ENCRYPTION_KEY) {
     throw new Error(
       "ENCRYPTION_KEY is not defined in the environment variables"
@@ -56,3 +56,4 @@ const decryptText = (encryption: Encrytion) => {
 };
 
 export { encryptText, decryptText };
+export type { Encryption };

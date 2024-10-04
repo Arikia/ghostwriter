@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
-import { decryptText } from "@/app/utils/encrypt";
 
 export async function GET() {
   // Resolve the path to the JSON file
