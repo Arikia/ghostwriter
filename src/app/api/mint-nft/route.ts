@@ -3,6 +3,12 @@ import zlib from "zlib";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import {
+  Connection,
+  Transaction,
+  TransactionInstruction,
+  PublicKey,
+} from "@solana/web3.js";
 import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
 import {
   generateSigner,
@@ -40,11 +46,18 @@ import { uploadNFTImageToArweave } from "@/app/utils/server/uploadToArweave";
 
 export async function POST(req: NextRequest) {
   if (req.method === "POST") {
-    const { author, title, text, published_at, published_where } =
+    const { author, title, text, published_at, published_where, user_wallet } =
       await req.json(); // what to include in request body
 
     // Validate required fields
-    if (!author || !title || !text || !published_at || !published_where) {
+    if (
+      !author ||
+      !title ||
+      !text ||
+      !published_at ||
+      !published_where ||
+      !user_wallet
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -68,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      // Create Signer from Wallet Secret Key
+      // Create Signer from Wallet Secret Key & Establish Connection
       const secretKeyArray = JSON.parse(
         process.env.DEV_WALLET_SECRET_KEY
       ) as number[];
@@ -82,13 +95,15 @@ export async function POST(req: NextRequest) {
 
       // Generate the Asset KeyPair
       const asset = generateSigner(umi);
-      console.log("This is your asset address", asset.publicKey.toString());
+      const assetPublicKey = new PublicKey(asset.publicKey);
+      console.log("This is your asset address", assetPublicKey);
 
       // Pass and Fetch the Collection
       const collection = await fetchCollection(
         umi,
         publicKey(process.env.COLLECTION_PUBKEY)
       );
+      const collectionPublicKey = new PublicKey(process.env.COLLECTION_PUBKEY);
 
       // Upload ctrl-x icon to arweave
       let imageUri = process.env.NFT_IMAGE_AW_URL;
@@ -116,22 +131,54 @@ export async function POST(req: NextRequest) {
       console.log({ metadataUri });
 
       // Generate the Asset
-      const tx = await create(umi, {
-        asset,
-        collection,
-        name: title,
-        uri: metadataUri,
-      }).sendAndConfirm(umi);
+      // const tx = await create(umi, {
+      //   asset,
+      //   collection,
+      //   name: title,
+      //   uri: metadataUri,
+      // }).sendAndConfirm(umi);
 
       // Deserialize the Signature from the Transaction
-      return NextResponse.json(
-        {
-          message: `Asset Created: https://solana.fm/tx/${
-            base58.deserialize(tx.signature)[0]
-          }?cluster=devnet-alpha`,
-        },
-        { status: 200 }
+      // return NextResponse.json(
+      //   {
+      //     message: `Asset Created: https://solana.fm/tx/${
+      //       base58.deserialize(tx.signature)[0]
+      //     }?cluster=devnet-alpha`,
+      //   },
+      //   { status: 200 }
+      // );
+
+      const tx = new Transaction().add(
+        new TransactionInstruction({
+          keys: [
+            { pubkey: assetPublicKey, isSigner: true, isWritable: true },
+            { pubkey: collectionPublicKey, isSigner: false, isWritable: false },
+            {
+              pubkey: new PublicKey(user_wallet),
+              isSigner: false,
+              isWritable: true,
+            },
+          ],
+          programId: collectionPublicKey, // NFT minting program
+          data: Buffer.from(metadataUri), // Attach the metadata URI to the transaction
+        })
       );
+
+      // Determine that the user pays for transaction
+      tx.feePayer = new PublicKey(user_wallet);
+
+      // Extract the blockhash
+      const blockhashInfo = await umi.rpc.getLatestBlockhash();
+      const recentBlockhash = blockhashInfo.blockhash;
+      tx.recentBlockhash = recentBlockhash;
+
+      // Return the unsigned transaction to the client
+      return NextResponse.json({
+        transaction: tx
+          .serialize({ requireAllSignatures: false })
+          .toString("base64"),
+        recentBlockhash,
+      });
     } catch (error) {
       console.log({ error });
       return NextResponse.json({ error: "Mint failed" }, { status: 500 });
