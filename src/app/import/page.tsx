@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import React, { useMemo } from "react";
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, Transaction } from "@solana/web3.js";
 
 type ExportExtract = {
   name: string;
@@ -16,10 +17,13 @@ type ExportExtract = {
 };
 
 const Page = () => {
+  const { connected, wallet, publicKey, sendTransaction } = useWallet();
   const [jsonData, setJsonData] = useState<ExportExtract | null>(null);
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState<string>("No file selected");
-  console.log({ jsonData });
+  const [isCreatingMint, setIsCreatingMint] = useState<boolean>(false);
+  const userWalletAddress = publicKey ? publicKey.toBase58() : null;
+  console.log({ jsonData, userWalletAddress });
   const shortenedData = useMemo(() => {
     if (!jsonData) return null;
 
@@ -94,6 +98,68 @@ const Page = () => {
     }
   };
 
+  const handleMint = async () => {
+    if (!jsonData) return;
+
+    const data = JSON.stringify(jsonData);
+
+    try {
+      console.log("Minting NFT with data:", data);
+      setIsCreatingMint(true);
+
+      // Call the API to mint the NFT
+      const response = await fetch("/api/mint-nft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          author: jsonData.name,
+          title: jsonData.posts[0].title,
+          text: jsonData.posts[0].text,
+          published_at: jsonData.posts[0].published_at,
+          published_where: "ghost",
+          user_wallet: userWalletAddress,
+        }),
+      });
+
+      const { transaction, recentBlockhash } = await response.json();
+
+      // Re-create the transaction object from the returned data
+      const connection = new Connection("https://api.devnet.solana.com");
+      const tx = Transaction.from(Buffer.from(transaction, "base64"));
+
+      // TODO: aha fee payer can just be set on FE! remove it from BE and do it here
+      // if (!tx.feePayer) {
+      //   tx.feePayer = publicKey;
+      // }
+
+      // Add the recent blockhash
+      tx.recentBlockhash = recentBlockhash;
+
+      const { value } = await connection.simulateTransaction(tx);
+
+      console.log("Simulation Result:", value);
+
+      // Ask the wallet to sign the transaction
+      const signedTransaction = await sendTransaction(tx, connection);
+
+      // Confirm the transaction on the Solana network
+      const confirmation = await connection.confirmTransaction(
+        signedTransaction
+      );
+
+      // Display the transaction signature
+      // setTransactionSignature(signedTransaction);
+
+      alert(`Transaction sent! Signature: ${signedTransaction}`);
+    } catch (e) {
+      console.error("Error minting NFT:", e);
+    } finally {
+      setIsCreatingMint(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -151,7 +217,9 @@ const Page = () => {
           </p>
         </div>
       )}
-      {shortenedData && <Button>On to the Blockchain</Button>}
+      {shortenedData && (
+        <Button onClick={handleMint}>On to the Blockchain</Button>
+      )}
     </div>
   );
 };
