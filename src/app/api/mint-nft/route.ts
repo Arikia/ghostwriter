@@ -1,4 +1,10 @@
-import zlib from "zlib";
+let zlib: any;
+
+if (typeof window === "undefined") {
+  // Import zlib only in the Node.js (server-side) environment, best working workaround I found so far
+  // should actually be fixable with fallbacks like browserify-zlib in next.config webpack config, but somehow that did not work...
+  zlib = require("zlib");
+}
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -77,6 +83,13 @@ export async function POST(req: NextRequest) {
     if (!process.env.DEV_WALLET_SECRET_KEY) {
       throw new Error(
         "DEV_WALLET_SECRET_KEY is not defined in the environment variables"
+      );
+    }
+
+    if (!zlib) {
+      return NextResponse.json(
+        { error: "Compression library not available" },
+        { status: 500 }
       );
     }
 
