@@ -42,3 +42,7 @@
 .stepContent {
   margin-top: 20px;
 }
+
+.goBackButton {
+  background-color:grey;
+}

@@ -171,7 +171,11 @@ const Page = () => {
           </div>
         ))}
       </div>
-      <Button disabled={!canGoBack} onClick={goToPreviousStep}>
+      <Button
+        disabled={!canGoBack}
+        onClick={goToPreviousStep}
+        className={style.goBackButton}
+      >
         Go Back
       </Button>
 
