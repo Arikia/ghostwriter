@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import classNames from "classnames";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, Transaction } from "@solana/web3.js";
@@ -23,7 +23,6 @@ type ExportExtract = {
 };
 
 const steps = {
-  // TODO: Connect Wallet
   0: "Connect Wallet",
   1: "Upload",
   2: "Confirm",
@@ -54,78 +53,86 @@ const Page = () => {
     };
   }, [jsonData]);
 
-  const goToNextStep = () => {
+  const goToNextStep = useCallback(() => {
     if (currentStep < Object.keys(steps).length - 1) {
       setCurrentStep(currentStep + 1);
     }
+  }, [currentStep]);
+
+  // up to the Checklist step, we want user to be able to go back
+  const canGoBack = currentStep > 0 && currentStep <= 2 && !isCreatingMint;
+
+  const resetUpload = () => {
+    setJsonData(null);
+    setFileName("No file selected");
   };
 
-  const goToPreviousStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const goToPreviousStep = useCallback(() => {
+    currentStep === 2 && resetUpload();
+    setCurrentStep(currentStep - 1);
+  }, [currentStep, resetUpload]);
 
   const handleMint = async () => {
-    if (!jsonData) return;
+    setIsCreatingMint(true);
+    // if (!jsonData) return;
 
-    const data = JSON.stringify(jsonData);
+    // const data = JSON.stringify(jsonData);
 
-    try {
-      console.log("Minting NFT with data:", data);
-      setIsCreatingMint(true);
+    // try {
+    //   console.log("Minting NFT with data:", data);
+    //   setIsCreatingMint(true);
 
-      // Call the API to mint the NFT
-      const response = await fetch("/api/mint-nft", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          author: jsonData.name,
-          title: jsonData.posts[0].title,
-          text: jsonData.posts[0].text,
-          published_at: jsonData.posts[0].published_at,
-          published_where: "ghost",
-          user_wallet: userWalletAddress,
-        }),
-      });
+    //   // Call the API to mint the NFT
+    //   const response = await fetch("/api/mint-nft", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       author: jsonData.name,
+    //       title: jsonData.posts[0].title,
+    //       text: jsonData.posts[0].text,
+    //       published_at: jsonData.posts[0].published_at,
+    //       published_where: "ghost",
+    //       user_wallet: userWalletAddress,
+    //     }),
+    //   });
 
-      const { transaction, recentBlockhash } = await response.json();
+    //   const { transaction, recentBlockhash } = await response.json();
 
-      // Re-create the transaction object from the returned data
-      const connection = new Connection("https://api.devnet.solana.com");
-      const tx = Transaction.from(Buffer.from(transaction, "base64"));
+    //   // Re-create the transaction object from the returned data
+    //   const connection = new Connection("https://api.devnet.solana.com");
+    //   const tx = Transaction.from(Buffer.from(transaction, "base64"));
 
-      // TODO: aha fee payer can just be set on FE! remove it from BE and do it here
-      // if (!tx.feePayer) {
-      //   tx.feePayer = publicKey;
-      // }
+    //   // TODO: aha fee payer can just be set on FE! remove it from BE and do it here
+    //   // if (!tx.feePayer) {
+    //   //   tx.feePayer = publicKey;
+    //   // }
 
-      // Add the recent blockhash
-      tx.recentBlockhash = recentBlockhash;
+    //   // Add the recent blockhash
+    //   tx.recentBlockhash = recentBlockhash;
 
-      const { value } = await connection.simulateTransaction(tx);
+    //   const { value } = await connection.simulateTransaction(tx);
 
-      console.log("Simulation Result:", value);
+    //   console.log("Simulation Result:", value);
 
-      // Ask the wallet to sign the transaction
-      const signedTransaction = await sendTransaction(tx, connection);
+    //   // Ask the wallet to sign the transaction
+    //   const signedTransaction = await sendTransaction(tx, connection);
 
-      // Confirm the transaction on the Solana network
-      const confirmation = await connection.confirmTransaction(
-        signedTransaction
-      );
+    //   // Confirm the transaction on the Solana network
+    //   const confirmation = await connection.confirmTransaction(
+    //     signedTransaction
+    //   );
 
-      // Display the transaction signature
-      // setTransactionSignature(signedTransaction);
+    //   // Display the transaction signature
+    //   // setTransactionSignature(signedTransaction);
 
-      alert(`Transaction sent! Signature: ${signedTransaction}`);
-    } catch (e) {
-      console.error("Error minting NFT:", e);
-    } finally {
-      setIsCreatingMint(false);
-    }
+    //   alert(`Transaction sent! Signature: ${signedTransaction}`);
+    // } catch (e) {
+    //   console.error("Error minting NFT:", e);
+    // } finally {
+    //   setIsCreatingMint(false);
+    // }
   };
 
   const handleSetJsonData = (data: ExportExtract) => {
@@ -164,6 +171,9 @@ const Page = () => {
           </div>
         ))}
       </div>
+      <Button disabled={!canGoBack} onClick={goToPreviousStep}>
+        Go Back
+      </Button>
 
       {currentStep === 0 && (
         <div>
@@ -187,6 +197,7 @@ const Page = () => {
           <br />
           <span>E-Mail: {shortenedData?.email}</span>
           <CheckTable
+            disabled={isCreatingMint}
             data={
               shortenedData
                 ? shortenedData.posts.map((post, index) => ({
@@ -198,7 +209,13 @@ const Page = () => {
                 : []
             }
           />
-          <Button onClick={handleMint}>Mint</Button>
+          <Button
+            onClick={handleMint}
+            loading={isCreatingMint}
+            disabled={isCreatingMint}
+          >
+            Mint
+          </Button>
         </div>
       )}
     </div>

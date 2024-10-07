@@ -7,7 +7,13 @@ type RowItem = {
   published_at: string;
 };
 
-export const CheckTable = ({ data }: { data: RowItem[] }) => {
+export const CheckTable = ({
+  data,
+  disabled,
+}: {
+  data: RowItem[];
+  disabled: boolean;
+}) => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
   // Handler for when a checkbox is clicked
@@ -57,6 +63,7 @@ export const CheckTable = ({ data }: { data: RowItem[] }) => {
               <input
                 type="checkbox"
                 checked={isAllSelected}
+                disabled={disabled}
                 onChange={handleSelectAll}
               />
               Select All
@@ -70,6 +77,7 @@ export const CheckTable = ({ data }: { data: RowItem[] }) => {
                 <input
                   type="checkbox"
                   checked={selectedRows.includes(item.id)}
+                  disabled={disabled}
                   onChange={() => handleCheckboxChange(item.id)}
                 />
               </td>
