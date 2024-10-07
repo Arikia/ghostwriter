@@ -18,6 +18,10 @@ export const Button: FC<ButtonProps> = ({
       className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${className}`}
       onClick={onClick}
       disabled={disabled}
+      style={{
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.5 : 1,
+      }}
     >
       {children}
     </button>
