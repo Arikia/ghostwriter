@@ -38,7 +38,7 @@ umi.use(signerIdentity(adminSigner));
   // Generate the collection
   let tx = await createCollection(umi, {
     collection,
-    name: "CTRL+X",
+    name: "CTRL+X Hackathon Version",
     uri: "https://ctrlx.world",
     plugins: [
       {

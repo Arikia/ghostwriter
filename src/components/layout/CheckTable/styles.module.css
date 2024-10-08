@@ -1,0 +1,16 @@
+.root {
+  max-height: 500px;
+  overflow-y: auto;
+  margin: 24px 0;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tableCell {
+  border: 1px solid black;
+  text-align: center;
+  padding: 4px 8px;
+}

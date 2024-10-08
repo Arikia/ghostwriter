@@ -1,0 +1,106 @@
+/* Container for each collapsible item */
+.collapsibleItem {
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f1f1f1;
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Left-aligned infoX */
+.publishedWhere {
+  flex: 1;
+  text-align: left;
+  text-transform: capitalize;
+}
+
+/* Middle-aligned infoY and infoZ */
+.title {
+  flex: 4;
+  text-align: left;
+  font-weight: bold;
+
+  white-space: nowrap;    
+  overflow: hidden;       
+  text-overflow: ellipsis;
+}
+
+.publishedAt {
+  flex: 1;
+  text-align: center;
+}
+
+/* Right-aligned smallInfo */
+.payment {
+  flex: 0.5;
+  text-align: right;
+  color: gray;
+  font-size: 0.8rem;
+}
+
+
+.collapsibleButton {
+  width: 100%;
+  background-color: #f1f1f1;
+  border: none;
+  text-align: left;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Add hover and focus effect for button */
+.collapsibleButton:hover,
+.collapsibleButton:focus {
+  background-color: #ddd;
+}
+
+/* The collapsible content container */
+.collapsibleContent {
+  max-height: 0; /* Initially collapsed */
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+  opacity: 0; /* Initially invisible */
+}
+
+/* Inner content to prevent padding from being collapsed */
+.innerContent {
+  padding: 10px;
+  background-color: #fafafa;
+  border-top: 1px solid #ccc;
+}
+
+/* Expanded state */
+.collapsibleContent.expanded {
+  opacity: 1; /* Fully visible when expanded */
+  max-height: 1000px; /* A large value to allow for smooth transitions */
+}
+
+.solanaLink {
+  color: #007bff;
+  text-decoration: underline;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.red {
+  color: darkred;
+}
+
+.green {
+  color: green;
+} 
+
+.blue {
+  color: blue;
+}
+
