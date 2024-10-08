@@ -1,0 +1,21 @@
+.input {
+  width: fit-content;
+  display: inline-block;
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+
+.dropArea {
+  width: 80%;
+  max-width: 800px;
+  min-height: 600px;
+  border: 2px dashed gray;
+  padding: 20px;
+  text-align: center;
+  background-color:  #fafafa;
+}
+
+.dropArea.dragging {
+  border: 2px dashed green;
+  background-color: #f0fff0;
+}

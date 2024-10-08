@@ -2,37 +2,48 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import classNames from "classnames";
+
 import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection, Transaction } from "@solana/web3.js";
 import { Button } from "@/components/ui/Button";
-import { CheckTable } from "@/components/ui/CheckTable";
-import { Upload } from "@/components/ui/Upload";
+import { CheckTable } from "@/components/layout/CheckTable/CheckTable";
+import { Upload } from "@/components/layout/Upload/Upload";
 
 import style from "./page.module.css";
 import { ConnectWallet } from "@/components/ui/ConnectWallet";
+import { NFTCard } from "@/components/layout/NFTCard/NFTCard";
 
 type ExportExtract = {
   name: string;
   email: string;
   posts: {
+    id: string;
     title: string;
     text: string;
-    html: string;
     published_at: string;
+    published_where: string;
   }[];
+};
+
+type MintedNFT = {
+  title: string;
+  image: string;
+  mint: string;
+  explorer_link: string;
 };
 
 const steps = {
   0: "Connect Wallet",
   1: "Upload",
-  2: "Confirm",
-  3: "Mint",
+  2: "Mint",
+  3: "Results",
 };
 
 const Page = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const { connected, wallet, publicKey, sendTransaction } = useWallet();
   const [jsonData, setJsonData] = useState<ExportExtract | null>(null);
+  const [selectedPostIds, setSelectedPostIds] = useState<string[]>([]);
+  const [mintedNFTs, setMintedNFTs] = useState<MintedNFT[]>([]);
 
   const [fileName, setFileName] = useState<string>("No file selected");
   const [isCreatingMint, setIsCreatingMint] = useState<boolean>(false);
@@ -46,12 +57,37 @@ const Page = () => {
       name,
       email,
       posts: posts.map((post) => ({
+        id: post.id,
         title: post.title,
         text: post.text.slice(0, 40).concat("..."),
         published_at: post.published_at,
+        published_where: post.published_where,
       })),
     };
   }, [jsonData]);
+
+  // Handler for when a checkbox is clicked
+  const handleCheckboxChange = (id: string) => {
+    setSelectedPostIds((prevSelectedRows) => {
+      if (prevSelectedRows.includes(id)) {
+        // Deselect the row
+        return prevSelectedRows.filter((rowId) => rowId !== id);
+      } else {
+        // Select the row
+        return [...prevSelectedRows, id];
+      }
+    });
+  };
+
+  // Handler for 'Select All' checkbox
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const allIds = jsonData?.posts.map((item) => item.id);
+      setSelectedPostIds(allIds?.length ? allIds : []);
+    } else {
+      setSelectedPostIds([]);
+    }
+  };
 
   const goToNextStep = useCallback(() => {
     if (currentStep < Object.keys(steps).length - 1) {
@@ -73,66 +109,70 @@ const Page = () => {
   }, [currentStep, resetUpload]);
 
   const handleMint = async () => {
-    setIsCreatingMint(true);
-    // if (!jsonData) return;
+    if (!jsonData) return;
 
-    // const data = JSON.stringify(jsonData);
+    const postsToMint = jsonData.posts.filter((post) =>
+      selectedPostIds.includes(post.id)
+    );
 
-    // try {
-    //   console.log("Minting NFT with data:", data);
-    //   setIsCreatingMint(true);
+    try {
+      setIsCreatingMint(true);
+      // Call the API to mint the NFT
+      const response = await fetch("/api/mint-nft", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          author: jsonData.name,
+          user_wallet: userWalletAddress,
+          published_where: "ghost",
+          posts: postsToMint,
+        }),
+      });
 
-    //   // Call the API to mint the NFT
-    //   const response = await fetch("/api/mint-nft", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       author: jsonData.name,
-    //       title: jsonData.posts[0].title,
-    //       text: jsonData.posts[0].text,
-    //       published_at: jsonData.posts[0].published_at,
-    //       published_where: "ghost",
-    //       user_wallet: userWalletAddress,
-    //     }),
-    //   });
+      if (response.ok) {
+        const { transactionResults } = await response.json();
 
-    //   const { transaction, recentBlockhash } = await response.json();
+        // in the future should be this
+        // const nftRes = await fetch(
+        //   `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_RPC_API_KEY}`,
+        //   {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify({
+        //       jsonrpc: "2.0",
+        //       id: process.env.NEXT_PUBLIC_HELIUS_RPC_ID,
+        //       method: "getAsset",
+        //       params: {
+        //         id: nft,
+        //       },
+        //     }),
+        //   }
+        // );
 
-    //   // Re-create the transaction object from the returned data
-    //   const connection = new Connection("https://api.devnet.solana.com");
-    //   const tx = Transaction.from(Buffer.from(transaction, "base64"));
+        const minted = transactionResults.map(
+          (r: { nft: string; txString: string; title: string }) => ({
+            title: r.title,
+            image:
+              "https://devnet.irys.xyz/D6UumRpJTxu5N4zihuwaDxZDsJkBUE8iAp7d8ZD8nf6f",
+            mint: r.nft,
+            explorer_link: `https://solana.fm/address/${r.txString}/transactions?cluster=devnet-alpha`,
+          })
+        );
 
-    //   // TODO: aha fee payer can just be set on FE! remove it from BE and do it here
-    //   // if (!tx.feePayer) {
-    //   //   tx.feePayer = publicKey;
-    //   // }
-
-    //   // Add the recent blockhash
-    //   tx.recentBlockhash = recentBlockhash;
-
-    //   const { value } = await connection.simulateTransaction(tx);
-
-    //   console.log("Simulation Result:", value);
-
-    //   // Ask the wallet to sign the transaction
-    //   const signedTransaction = await sendTransaction(tx, connection);
-
-    //   // Confirm the transaction on the Solana network
-    //   const confirmation = await connection.confirmTransaction(
-    //     signedTransaction
-    //   );
-
-    //   // Display the transaction signature
-    //   // setTransactionSignature(signedTransaction);
-
-    //   alert(`Transaction sent! Signature: ${signedTransaction}`);
-    // } catch (e) {
-    //   console.error("Error minting NFT:", e);
-    // } finally {
-    //   setIsCreatingMint(false);
-    // }
+        setMintedNFTs(minted);
+        goToNextStep();
+      } else {
+        console.error("Minting failed");
+      }
+    } catch (e) {
+      console.error("Error minting NFT:", e);
+    } finally {
+      setIsCreatingMint(false);
+    }
   };
 
   const handleSetJsonData = (data: ExportExtract) => {
@@ -141,44 +181,41 @@ const Page = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {/* @ts-ignore */}
-      <div>{steps[currentStep]}</div>
+    <div className={style.root}>
+      <div className={style.flow}>
+        {/* @ts-ignore */}
+        <h2 className={style.flowName}>{steps[currentStep]}</h2>
 
-      <div className={style.stepsContainer}>
-        {Object.keys(steps).map((step, index) => (
-          <div key={index} className={style.stepWrapper}>
-            <div
-              className={classNames(style.stepCircle, {
-                [style.active]: index <= currentStep,
-              })}
-            >
-              {index + 1}
-            </div>
-            {index < Object.keys(steps).length - 1 && (
+        <div className={style.stepsContainer}>
+          {Object.keys(steps).map((step, index) => (
+            <div key={index} className={style.stepWrapper}>
               <div
-                className={classNames(style.stepLine, {
-                  [style.filled]: index <= currentStep,
+                className={classNames(style.stepCircle, {
+                  [style.active]: index <= currentStep,
                 })}
-              ></div>
-            )}
-          </div>
-        ))}
+              >
+                {index + 1}
+              </div>
+              {index < Object.keys(steps).length - 1 && (
+                <div
+                  className={classNames(style.stepLine, {
+                    [style.filled]: index <= currentStep,
+                  })}
+                ></div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className={style.goBackButtonWrapper}>
+          <Button
+            disabled={!canGoBack}
+            onClick={goToPreviousStep}
+            className={style.goBackButton}
+          >
+            Go Back
+          </Button>
+        </div>
       </div>
-      <Button
-        disabled={!canGoBack}
-        onClick={goToPreviousStep}
-        className={style.goBackButton}
-      >
-        Go Back
-      </Button>
-
       {currentStep === 0 && (
         <div>
           <ConnectWallet />
@@ -204,26 +241,46 @@ const Page = () => {
             disabled={isCreatingMint}
             data={
               shortenedData
-                ? shortenedData.posts.map((post, index) => ({
-                    id: index,
+                ? shortenedData.posts.map((post) => ({
+                    id: post.id,
                     title: post.title,
                     published_at: post.published_at,
+                    published_where: "ghost",
                     text: post.text,
                   }))
                 : []
             }
+            selectedPostIds={selectedPostIds}
+            onCheckboxChange={handleCheckboxChange}
+            onSelectAll={handleSelectAll}
           />
           <Button
             onClick={handleMint}
             loading={isCreatingMint}
-            disabled={isCreatingMint}
+            disabled={isCreatingMint || selectedPostIds.length === 0}
           >
             Mint
           </Button>
         </div>
+      )}
+      {currentStep === 3 && (
+        <>
+          <div className={style.nftCards}>
+            {mintedNFTs.map(({ title, image, mint, explorer_link }, index) => (
+              <NFTCard
+                key={index}
+                title={title}
+                mint={mint}
+                image={image}
+                explorer_link={explorer_link}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 };
 
 export default Page;
+export type { ExportExtract, MintedNFT };

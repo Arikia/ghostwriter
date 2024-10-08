@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import styles from "./styles.module.css";
+import classNames from "classnames";
 
 export const Upload = ({
   setFileName,
@@ -31,6 +33,7 @@ export const Upload = ({
     processFile(file);
   };
 
+  // TODO -> when no posts can be processed, show an error message and prevent proceeding in UI flow
   const processFile = async (file: File | null) => {
     if (file && file.type === "application/json") {
       const reader = new FileReader();
@@ -42,7 +45,8 @@ export const Upload = ({
           const parsedData = JSON.parse(fileContent);
 
           const { users, posts: texts } = parsedData.db[0].data;
-          const user = users.find((user: any) => user.name.includes("rikia")); // hardcoded for now
+          // const user = users.find((user: any) => user.name.includes("rikia")); // hardcoded for now
+          const user = users[0]; // hardcoded for now
           const name = user.name;
           const email = user.email;
           const posts = texts
@@ -50,10 +54,11 @@ export const Upload = ({
               (text: any) => text.status === "published" && text.type === "post"
             )
             .map((post: any) => ({
+              id: post.id,
               title: post.title,
               text: post.plaintext,
-              html: post.html,
               published_at: post.published_at,
+              published_where: "ghost",
             }));
           handleDoneUploading({ name, email, posts });
         } catch (error) {
@@ -69,36 +74,25 @@ export const Upload = ({
 
   return (
     <>
-      <h1 style={{ textAlign: "center", fontSize: "3em" }}>Import</h1>
-      <h3 style={{ textAlign: "center" }}>
-        Upload your Ghost export json file here to put it on blockchain
-      </h3>
+      <div>
+        <h3 style={{ textAlign: "center" }}>
+          Upload your Ghost export json file here to put it on blockchain
+        </h3>
 
-      <input
-        style={{
-          width: "fit-content",
-          display: "inline-block",
-          margin: "24px 0 ",
-        }}
-        type="file"
-        accept=".json"
-        onChange={handleFileUpload}
-      />
-
+        <input
+          className={styles.input}
+          type="file"
+          accept=".json"
+          onChange={handleFileUpload}
+        />
+      </div>
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        style={{
-          width: "80%",
-          maxWidth: "800px",
-          minHeight: "600px",
-          border: dragging ? "2px dashed green" : "2px dashed gray",
-          padding: "20px",
-          margin: "42px 0",
-          textAlign: "center",
-          backgroundColor: dragging ? "#f0fff0" : "#fafafa",
-        }}
+        className={classNames(styles.dropArea, {
+          [styles.dragging]: dragging,
+        })}
       >
         <p>
           {dragging ? "Drop the file here..." : "Drag & drop a JSON file here"}

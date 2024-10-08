@@ -1,0 +1,52 @@
+{
+  "db": [
+    {
+      "meta": {
+        "exported_on": 1727775778822,
+        "version": "5.95.0-0-gde82b6b"
+      },
+      "data": {
+        "users": [
+          {
+            "name": "Jane Doe",
+            "email": "janedoe@ctrlx.org"
+          }
+        ],
+        "posts": [
+          {
+            "id": "154324893290",
+            "title": "Hello World again",
+            "plaintext": "Hello World! This is my first post on this blog.",
+            "published_at": "2021-11-05T20:00:00Z",
+            "status": "published",
+            "type": "post"
+          },
+          {
+            "id": "149432448932",
+            "title": "Second Post of Jane",
+            "plaintext": "This is my second post on this blog. I hope you like it. And sometimes I start talking, blablablab. I cannot stop talking, i love explaining the whole world.",
+            "published_at": "2021-01-02T00:00:00Z",
+            "status": "published",
+            "type": "post"
+          },
+          {
+            "id": "375729421535",
+            "title": "Third Post of Jane",
+            "plaintext": "guration to bypass the error when certain Node.js core modules are not needed. Reinstalling Libraries",
+            "published_at": "2023-04-09T22:00:00Z",
+            "status": "published",
+            "type": "post"
+          },
+          {
+            "id": "72357294213534242",
+            "title": "A Bedtime Story",
+            "plaintext": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.",
+            "published_at": "2023-07-12T00:40:00Z",
+            "status": "published",
+            "type": "post"
+          }
+        ]
+      }
+    }
+  ]
+}

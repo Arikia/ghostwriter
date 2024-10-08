@@ -9,20 +9,8 @@ if (typeof window === "undefined") {
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  Keypair,
-  sendAndConfirmTransaction,
-} from "@solana/web3.js";
-import {
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress,
-  getAccount,
-  createAssociatedTokenAccountInstruction,
-} from "@solana/spl-token";
+import { Keypair, PublicKey } from "@solana/web3.js";
+
 import { create, fetchCollection } from "@metaplex-foundation/mpl-core";
 import {
   generateSigner,
@@ -40,43 +28,6 @@ import {
 import { encryptText } from "@/app/utils/server/encrypt";
 import { createMetadata } from "@/app/utils/server/createMetadata";
 import { uploadNFTImageToArweave } from "@/app/utils/server/uploadToArweave";
-
-// Function to find or create an associated token account
-async function getOrCreateAssociatedTokenAccount(
-  connection: Connection,
-  mintAddress: PublicKey,
-  owner: PublicKey,
-  payer: Keypair
-) {
-  const associatedTokenAddress = await Token.getAssociatedTokenAddress(
-    ASSOCIATED_TOKEN_PROGRAM_ID,
-    TOKEN_PROGRAM_ID,
-    mintAddress,
-    owner
-  );
-
-  // Check if the token account already exists
-  const tokenAccountInfo = await connection.getAccountInfo(
-    associatedTokenAddress
-  );
-
-  // If it doesn't exist, create it
-  if (!tokenAccountInfo) {
-    const transaction = new Transaction().add(
-      Token.createAssociatedTokenAccountInstruction(
-        ASSOCIATED_TOKEN_PROGRAM_ID,
-        TOKEN_PROGRAM_ID,
-        mintAddress,
-        associatedTokenAddress,
-        owner,
-        payer.publicKey
-      )
-    );
-    await sendAndConfirmTransaction(connection, transaction, [payer]);
-  }
-
-  return associatedTokenAddress;
-}
 
 /* TODO:
 -protect the route with a secret key or sth.
@@ -97,18 +48,23 @@ async function getOrCreateAssociatedTokenAccount(
 
 export async function POST(req: NextRequest) {
   if (req.method === "POST") {
-    const { author, title, text, published_at, published_where, user_wallet } =
-      await req.json(); // what to include in request body
+    // const secretKey = new Uint8Array(
+    //   process.env
+    //     .DEV_WALLET_SECRET_KEY!.replace("[", "")
+    //     .replace("]", "")
+    //     .split(",")
+    //     .map(Number)
+    // );
+    // const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
+    // const ourPublicKey = keypair.publicKey.toString(); // Get the public key
+    // console.log("Public Key:", ourPublicKey);
+
+    const { author, posts, published_where, user_wallet } = await req.json(); // what to include in request body
+
+    console.log({ author, posts, published_where, user_wallet });
 
     // Validate required fields
-    if (
-      !author ||
-      !title ||
-      !text ||
-      !published_at ||
-      !published_where ||
-      !user_wallet
-    ) {
+    if (!author || !posts.length || !published_where || !user_wallet) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -144,11 +100,6 @@ export async function POST(req: NextRequest) {
       const adminSigner = createSignerFromKeypair(umi, keypair);
       umi.use(signerIdentity(adminSigner)).use(irysUploader());
 
-      // Generate the Asset KeyPair
-      const asset = generateSigner(umi);
-      const assetPublicKey = new PublicKey(asset.publicKey);
-      console.log("This is your asset address", assetPublicKey);
-
       // Pass and Fetch the Collection
       const collection = await fetchCollection(
         umi,
@@ -161,97 +112,60 @@ export async function POST(req: NextRequest) {
         imageUri = await uploadNFTImageToArweave(umi);
       }
 
-      // Compress & Encrypt the text
-      // for decompressing: zlib.inflateSync(Buffer.from(compressedText, "base64")).toString();
-      const compressedText = zlib.deflateSync(text).toString("base64");
-      const encryption = encryptText(compressedText);
+      // Prepare to store transaction signatures
+      const transactionResults = [];
 
-      // Generate Metadata
-      const metadata = createMetadata({
-        title,
-        imageUri,
-        author,
-        published_at,
-        published_where,
-        encryption,
-      });
+      // Loop through the posts and mint NFTs
+      for (const post of posts) {
+        // Generate the Asset KeyPair
+        const asset = generateSigner(umi);
+        const assetPublicKey = new PublicKey(asset.publicKey);
+        console.log("This is your asset address", assetPublicKey);
+        // Compress & Encrypt the text
+        // for decompressing: zlib.inflateSync(Buffer.from(compressedText, "base64")).toString();
+        const compressedText = zlib.deflateSync(post.text).toString("base64");
+        const encryption = encryptText(compressedText);
 
-      // Upload Metadata
-      const metadataUri = await umi.uploader.uploadJson(metadata);
-      console.log({ metadataUri });
+        // Generate Metadata
+        const metadata = createMetadata({
+          title: post.title,
+          imageUri,
+          author,
+          published_at: post.published_at,
+          published_where,
+          encryption,
+        });
+        console.log({ metadata });
 
-      // Generate the Asset
-      const tx = await create(umi, {
-        asset,
-        collection,
-        name: title,
-        uri: metadataUri,
-      }).sendAndConfirm(umi);
+        // Upload Metadata
+        const metadataUri = await umi.uploader.uploadJson(metadata);
+        console.log({ metadataUri });
 
-      // ********
+        // Generate the Asset
+        const tx = await create(umi, {
+          asset,
+          collection,
+          name: post.title,
+          uri: "https://devnet.irys.xyz/" + metadataUri.split("/").pop(),
+          owner: publicKey(user_wallet),
+        }).sendAndConfirm(umi);
 
-      // Establish Connection
-      const connection = new Connection("https://api.devnet.solana.com");
-
-      // Get or create associated token account for user wallet
-      // Assuming the minted NFT is tied to this mint address
-      const userWalletPublicKey = new PublicKey(user_wallet);
-      const associatedTokenAddress = await getAssociatedTokenAddress(
-        assetPublicKey,
-        userWalletPublicKey,
-        false,
-        TOKEN_PROGRAM_ID,
-        ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-
-      try {
-        // Check if the token account exists for the user's wallet
-        await getAccount(connection, associatedTokenAddress);
-        console.log(
-          "Token account exists for the user's wallet:",
-          associatedTokenAddress.toString()
-        );
-      } catch (err) {
-        console.log("Token account does not exist, creating a new one...");
-        const ataCreationInstruction = createAssociatedTokenAccountInstruction(
-          new PublicKey(keypair.publicKey), // Payer
-          associatedTokenAddress, // ATA to create
-          userWalletPublicKey, // The user's wallet that will receive the NFT
-          assetPublicKey, // Mint address (the asset)
-          TOKEN_PROGRAM_ID, // Token program ID
-          ASSOCIATED_TOKEN_PROGRAM_ID
-        );
-
-        // Add this instruction to the transaction
-        const tx = new Transaction().add(ataCreationInstruction);
-
-        // Set the fee payer for the transaction
-        tx.feePayer = new PublicKey(keypair.publicKey);
-
-        // Extract the blockhash for the transaction
-        const blockhashInfo = await connection.getLatestBlockhash();
-        tx.recentBlockhash = blockhashInfo.blockhash;
-        try {
-          // Sign and send the transaction to create the associated token account
-          const signature = await sendAndConfirmTransaction(connection, tx, [
-            Keypair.fromSecretKey(secretKey),
-          ]);
-
-          console.log("Associated token account created:", signature);
-        } catch (err) {
-          // @ts-ignore
-          const bla = await err?.getLogs();
-          console.log("Error creating associated token account:", bla);
-        }
+        // save the transaction signature
+        transactionResults.push({
+          nft: assetPublicKey,
+          txString: base58.deserialize(tx.signature)[0],
+          title: post.title,
+        });
       }
-      // ********
+
+      // `Asset Created: https://solana.fm/tx/${
+      //   base58.deserialize(tx.signature)[0]
+      //  }?cluster=devnet-alpha`
 
       // Deserialize the Signature from the Transaction
       return NextResponse.json(
         {
-          message: `Asset Created: https://solana.fm/tx/${
-            base58.deserialize(tx.signature)[0]
-          }?cluster=devnet-alpha`,
+          transactionResults,
         },
         { status: 200 }
       );

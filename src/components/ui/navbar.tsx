@@ -22,9 +22,6 @@ export default function Navbar() {
           <a href="/library" className="text-gray-300 hover:text-white">
             Library
           </a>
-          <a href="#contact" className="text-gray-300 hover:text-white">
-            Licence
-          </a>
           <ConnectWallet />
         </div>
       </div>

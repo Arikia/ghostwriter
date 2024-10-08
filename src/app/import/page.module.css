@@ -1,3 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px;
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.flowName {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.goBackButtonWrapper {
+  width: 100%;
+ }
+ 
+ .goBackButton {
+   background-color:grey;
+   font-size: 12px;
+ }
+
 .stepsContainer {
   display: flex;
   align-items: center;
@@ -38,11 +68,14 @@
   background-color: #1F2937; /* Fill the line when the step is active */
 }
 
-
 .stepContent {
   margin-top: 20px;
 }
 
-.goBackButton {
-  background-color:grey;
+
+.nftCards {
+  width: 80%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
 }
