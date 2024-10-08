@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import styles from "./styles.module.css";
@@ -8,12 +8,12 @@ import { COLLECTION_PUBKEY, HELIUS_URL } from "@/constants";
 import { fetcher } from "../utils/client/fetcher";
 import { CollapsibleItem } from "@/components/ui/CollapsibleItem/CollapsibleItem";
 import { getMetadataValue } from "../utils/client/getMetadataValue";
+import { getRandomPrice } from "../utils/client/randomPrice";
 
 const Briefcase = () => {
   const { publicKey } = useWallet();
   const userWalletAddress = publicKey ? publicKey.toBase58() : null;
 
-  // Use SWR to fetch data
   const { data: articles, error } = useSWR(
     [
       HELIUS_URL,
@@ -31,12 +31,24 @@ const Briefcase = () => {
     ],
     ([url, body]) => fetcher(url, body)
   );
-  const myPosts =
-    articles?.items?.length > 0
-      ? articles?.items.filter(
-          (x: any) => x.ownership.owner == userWalletAddress
-        )
+  const myPosts = useMemo(() => {
+    return articles?.items?.length > 0
+      ? articles?.items
+          .filter((x: any) => x.ownership.owner == userWalletAddress)
+          .map((x: any) => ({ ...x, earned: getRandomPrice(0.12, 389.4) }))
       : [];
+  }, [articles]);
+
+  const totalEarned = useMemo(
+    () =>
+      myPosts?.length > 0
+        ? myPosts.reduce(
+            (acc: number, post: any) => acc + Number(post.earned),
+            0
+          )
+        : 0,
+    [myPosts]
+  );
 
   if (!userWalletAddress) {
     return <div>Connect your wallet to view your briefcase</div>;
@@ -46,6 +58,7 @@ const Briefcase = () => {
     <div className={styles.root}>
       <h2 className={styles.title}>Briefcase</h2>
       <p>My NFTs</p>
+      <p>Earned Total: {Math.floor(totalEarned * 100) / 100}$</p>
       <div className={styles.content}>
         {/* @ts-ignore */}
         {myPosts.map((post, index) => (
@@ -69,6 +82,7 @@ const Briefcase = () => {
               iv: getMetadataValue(post.content.metadata, "encryption_iv"),
             }}
             nftId={post.id}
+            earned={post.earned}
           >
             <h4 className={styles.articleTitle}>
               {post.content.metadata.name}

@@ -36,29 +36,18 @@ import { COLLECTION_PUBKEY, NFT_IMAGE_AW_URL } from "@/constants";
 -other api security considerations...
 */
 
-// const secretKey = new Uint8Array(
-//   process.env
-//     .DEV_WALLET_SECRET_KEY!.replace("[", "")
-//     .replace("]", "")
-//     .split(",")
-//     .map(Number)
-// );
-// const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
-// const ourPublicKey = keypair.publicKey.toString(); // Get the public key
-// console.log("Public Key:", ourPublicKey);
-
 export async function POST(req: NextRequest) {
   if (req.method === "POST") {
-    // const secretKey = new Uint8Array(
-    //   process.env
-    //     .DEV_WALLET_SECRET_KEY!.replace("[", "")
-    //     .replace("]", "")
-    //     .split(",")
-    //     .map(Number)
-    // );
-    // const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
-    // const ourPublicKey = keypair.publicKey.toString(); // Get the public key
-    // console.log("Public Key:", ourPublicKey);
+    const secretKey = new Uint8Array(
+      process.env
+        .DEV_WALLET_SECRET_KEY!.replace("[", "")
+        .replace("]", "")
+        .split(",")
+        .map(Number)
+    );
+    const keypair = Keypair.fromSecretKey(secretKey); // Create the Keypair
+    const ourPublicKey = keypair.publicKey.toString(); // Get the public key
+    console.log("*********Public Key:", ourPublicKey);
 
     const { author, posts, published_where, user_wallet, cms } =
       await req.json(); // what to include in request body

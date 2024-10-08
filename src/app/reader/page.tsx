@@ -40,7 +40,6 @@ type CollapsibleListProps = {
 const Page: React.FC = () => {
   const { publicKey } = useWallet();
   const userWalletAddress = publicKey ? publicKey.toBase58() : null;
-
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [filters, setFilters] = useState({
     lastName: "",
@@ -124,40 +123,59 @@ const Page: React.FC = () => {
             </div>
 
             {/* @ts-ignore */}
-            {articles?.items?.map((item, index) => (
-              <CollapsibleItem
-                key={index}
-                title={item.content.metadata.name}
-                published_at={new Date(
-                  getMetadataValue(item.content.metadata, "published_at")
-                ).toLocaleDateString("en-US", {})}
-                published_where={getMetadataValue(
-                  item.content.metadata,
-                  "published_where"
-                )}
-                payment={2}
-                owner={item.ownership.owner}
-                encryption={{
-                  encryptedText: getMetadataValue(
+            {articles?.items
+              ?.sort((a: any, b: any) => {
+                const aPublishedAt = getMetadataValue(
+                  a.content.metadata,
+                  "published_at"
+                );
+                const bPublishedAt = getMetadataValue(
+                  b.content.metadata,
+                  "published_at"
+                );
+
+                // Convert the date strings to Date objects and compare them
+                // @ts-ignore
+                return new Date(bPublishedAt) - new Date(aPublishedAt);
+              })
+              // @ts-ignore
+              .map((item, index) => (
+                <CollapsibleItem
+                  key={index}
+                  title={item.content.metadata.name}
+                  published_at={new Date(
+                    getMetadataValue(item.content.metadata, "published_at")
+                  ).toLocaleDateString("en-US", {})}
+                  published_where={getMetadataValue(
                     item.content.metadata,
-                    "encrypted_text"
-                  ),
-                  iv: getMetadataValue(item.content.metadata, "encryption_iv"),
-                }}
-                nftId={item.id}
-              >
-                <h4 className={styles.articleTitle}>
-                  {item.content.metadata.name}
-                </h4>
-                <h5 className={styles.subtitle}>
-                  {item.content.metadata.description}
-                </h5>
-                <p className={styles.author}>
-                  Written By:{" "}
-                  {getMetadataValue(item.content.metadata, "author")}
-                </p>
-              </CollapsibleItem>
-            ))}
+                    "published_where"
+                  )}
+                  payment={2}
+                  owner={item.ownership.owner}
+                  encryption={{
+                    encryptedText: getMetadataValue(
+                      item.content.metadata,
+                      "encrypted_text"
+                    ),
+                    iv: getMetadataValue(
+                      item.content.metadata,
+                      "encryption_iv"
+                    ),
+                  }}
+                  nftId={item.id}
+                >
+                  <h4 className={styles.articleTitle}>
+                    {item.content.metadata.name}
+                  </h4>
+                  <h5 className={styles.subtitle}>
+                    {item.content.metadata.description}
+                  </h5>
+                  <p className={styles.author}>
+                    Written By:{" "}
+                    {getMetadataValue(item.content.metadata, "author")}
+                  </p>
+                </CollapsibleItem>
+              ))}
           </div>
         ) : (
           <div>Please Connect your Wallet</div>

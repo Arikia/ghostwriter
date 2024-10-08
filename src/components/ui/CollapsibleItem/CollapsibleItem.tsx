@@ -1,4 +1,10 @@
-import React, { useState, ReactNode, useRef, useEffect } from "react";
+import React, {
+  useState,
+  ReactNode,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import styles from "./styles.module.css"; // Assuming you're using CSS modules
 import useSWR from "swr";
@@ -12,6 +18,7 @@ import {
 import { Button } from "../Button";
 import { COINGECKO_SOLANA_PRICE_URL } from "@/constants";
 import { convertCentsToSOL } from "@/app/utils/client/convertCentsToSol";
+import classNames from "classnames";
 
 // Define the props for each item in the list
 type CollapsibleItemProps = {
@@ -23,6 +30,7 @@ type CollapsibleItemProps = {
   owner: string;
   encryption: Encryption;
   nftId: string;
+  earned?: number;
 };
 
 enum TextPaymentStatus {
@@ -45,6 +53,7 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
   owner,
   encryption,
   nftId,
+  earned,
 }) => {
   const { data = { solana: { usd: 120 } }, error } = useSWR(
     COINGECKO_SOLANA_PRICE_URL,
@@ -61,12 +70,13 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
   const contentRef = useRef<HTMLDivElement>(null); // Reference to the content div
   const [plainText, setPlainText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch("/api/read", {
@@ -91,7 +101,7 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [encryption]);
 
   const handlePayment = async (
     nftId: string,
@@ -136,20 +146,20 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
 
       // Update localStorage to mark the article as paid
       localStorage.setItem(nftId, "1");
+      setShouldRefetch(true);
 
       alert("Payment successful!");
     } catch (error) {
       alert(`Payment failed:, ${error}`);
-      alert("Payment failed. Please try again.");
     }
   };
 
   // Use effect to fetch data when component mounts
   useEffect(() => {
-    if (isExpanded && (isAuthor() || localStorage.getItem(nftId) === "1")) {
+    if (isExpanded && (isAuthor() || shouldRefetch)) {
       fetchData();
     }
-  }, [isExpanded, localStorage.getItem(nftId)]);
+  }, [isExpanded, isAuthor(), fetchData, shouldRefetch]);
 
   useEffect(() => {
     if (isExpanded && contentRef.current) {
@@ -173,7 +183,16 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
         <div className={styles.publishedWhere}>{published_where}</div>
         <div className={styles.title}>{title}</div>
         <div className={styles.publishedAt}>{published_at}</div>
-        <div className={styles.payment}>{getPaymentIndication()}</div>
+        <div
+          className={classNames(styles.payment, {
+            [styles.red]:
+              getPaymentIndication() === TextPaymentStatus.PAY_TO_READ,
+            [styles.blue]: getPaymentIndication() === TextPaymentStatus.YOURS,
+            [styles.green]: getPaymentIndication() === TextPaymentStatus.PAID,
+          })}
+        >
+          {earned ? `Earned: ${earned}$` : getPaymentIndication()}
+        </div>
       </div>
       <div
         ref={contentRef}
