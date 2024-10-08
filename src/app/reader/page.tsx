@@ -5,7 +5,6 @@ import useSWR from "swr";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import { COLLECTION_PUBKEY, HELIUS_URL } from "@/constants";
-
 import styles from "./page.module.css";
 
 import { CollapsibleItem } from "@/components/ui/CollapsibleItem/CollapsibleItem";

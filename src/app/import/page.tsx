@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
+import Confetti from "react-confetti";
 import Link from "next/link";
 import classNames from "classnames";
 
@@ -284,6 +285,7 @@ const Page = () => {
       )}
       {currentStep === 3 && (
         <>
+          <Confetti width={1800} height={3000} />
           <h3 className={style.successHeader}>
             Freshly minted! 🎉 Continue to Briefcase
           </h3>
