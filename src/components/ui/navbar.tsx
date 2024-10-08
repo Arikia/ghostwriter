@@ -19,8 +19,8 @@ export default function Navbar() {
           <a href="/briefcase" className="text-gray-300 hover:text-white">
             Briefcase
           </a>
-          <a href="/library" className="text-gray-300 hover:text-white">
-            Library
+          <a href="/reader" className="text-gray-300 hover:text-white">
+            Reader
           </a>
           <a href="/about" className="text-gray-300 hover:text-white">
             About

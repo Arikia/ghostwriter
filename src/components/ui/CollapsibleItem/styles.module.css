@@ -6,7 +6,47 @@
   overflow: hidden;
 }
 
-/* Button that controls the collapsible behavior */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f1f1f1;
+  padding: 10px;
+  cursor: pointer;
+}
+
+/* Left-aligned infoX */
+.publishedWhere {
+  flex: 1;
+  text-align: left;
+  text-transform: capitalize;
+}
+
+/* Middle-aligned infoY and infoZ */
+.title {
+  flex: 4;
+  text-align: left;
+  font-weight: bold;
+
+  white-space: nowrap;    
+  overflow: hidden;       
+  text-overflow: ellipsis;
+}
+
+.publishedAt {
+  flex: 1;
+  text-align: center;
+}
+
+/* Right-aligned smallInfo */
+.payment {
+  flex: 0.5;
+  text-align: right;
+  color: gray;
+  font-size: 0.8rem;
+}
+
+
 .collapsibleButton {
   width: 100%;
   background-color: #f1f1f1;
@@ -44,3 +84,11 @@
   opacity: 1; /* Fully visible when expanded */
   max-height: 1000px; /* A large value to allow for smooth transitions */
 }
+
+.solanaLink {
+  color: #007bff;
+  text-decoration: underline;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+

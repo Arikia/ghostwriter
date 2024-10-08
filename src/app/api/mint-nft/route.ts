@@ -63,8 +63,6 @@ export async function POST(req: NextRequest) {
     const { author, posts, published_where, user_wallet, cms } =
       await req.json(); // what to include in request body
 
-    console.log({ author, posts, published_where, user_wallet });
-
     // Validate required fields
     if (!author || !posts.length || !published_where || !user_wallet) {
       return NextResponse.json(
@@ -160,10 +158,6 @@ export async function POST(req: NextRequest) {
           title: post.title,
         });
       }
-
-      // `Asset Created: https://solana.fm/tx/${
-      //   base58.deserialize(tx.signature)[0]
-      //  }?cluster=devnet-alpha`
 
       // Deserialize the Signature from the Transaction
       return NextResponse.json(
