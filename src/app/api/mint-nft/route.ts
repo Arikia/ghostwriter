@@ -33,7 +33,7 @@ import { COLLECTION_PUBKEY, NFT_IMAGE_AW_URL } from "@/constants";
 /* TODO:
 -protect the route with a secret key or sth.
 -validate the request body
--what's with batch uploads?
+-other api security considerations...
 */
 
 // const secretKey = new Uint8Array(
@@ -60,7 +60,8 @@ export async function POST(req: NextRequest) {
     // const ourPublicKey = keypair.publicKey.toString(); // Get the public key
     // console.log("Public Key:", ourPublicKey);
 
-    const { author, posts, published_where, user_wallet } = await req.json(); // what to include in request body
+    const { author, posts, published_where, user_wallet, cms } =
+      await req.json(); // what to include in request body
 
     console.log({ author, posts, published_where, user_wallet });
 
@@ -135,6 +136,7 @@ export async function POST(req: NextRequest) {
           published_at: post.published_at,
           published_where,
           encryption,
+          cms,
         });
         console.log({ metadata });
 

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import useSWR from "swr";
 
 import { COLLECTION_PUBKEY, HELIUS_URL } from "@/constants";
 
 import styles from "./page.module.css";
+import { CollapsibleItem } from "@/components/ui/CollapsibleItem/CollapsibleItem";
 
 interface Article {
   id: number;
@@ -15,6 +16,11 @@ interface Article {
   First_part: string;
   price: number;
 }
+
+// Component for the entire collapsible list
+type CollapsibleListProps = {
+  items: { title: string; content: ReactNode }[];
+};
 
 // Define the fetcher function for SWR
 const fetcher = async (url: string, body: any) => {
@@ -132,7 +138,17 @@ const Page: React.FC = () => {
           </button>
         </div>
       </div>
-      <div className={styles.content}></div>
+      <div className={styles.content}>
+        <div className={styles.collapsibleList}>
+          {/* @ts-ignore */}
+          {articles?.items?.map((item, index) => (
+            <CollapsibleItem key={index} title={item.content.metadata.name}>
+              {/* {item.content.metadata.name} */}
+              "Hello, I am expanded"
+            </CollapsibleItem>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

@@ -58,7 +58,8 @@ export const Upload = ({
               title: post.title,
               text: post.plaintext,
               published_at: post.published_at,
-              published_where: "ghost",
+              published_where: "CTRL-X",
+              cms: post.published_at,
             }));
           handleDoneUploading({ name, email, posts });
         } catch (error) {
@@ -76,7 +77,8 @@ export const Upload = ({
     <>
       <div>
         <h3 style={{ textAlign: "center" }}>
-          Upload your Ghost export json file here to put it on blockchain
+          Upload your Ghost export json file here to create your Blockchain
+          license
         </h3>
 
         <input

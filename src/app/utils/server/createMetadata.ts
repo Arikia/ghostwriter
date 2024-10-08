@@ -7,6 +7,7 @@ type CreateMetadataArgs = {
   published_at: string;
   published_where: string;
   encryption: Encryption;
+  cms?: string;
 };
 const createMetadata = ({
   title,
@@ -15,6 +16,7 @@ const createMetadata = ({
   published_at,
   published_where,
   encryption,
+  cms,
 }: CreateMetadataArgs) => ({
   name: "CTRL+X",
   description: title + "(Journalistic Content recorded through CTRL+X)",
@@ -44,6 +46,10 @@ const createMetadata = ({
     {
       trait_type: "encryption_iv",
       value: encryption.iv,
+    },
+    {
+      trait_type: "cms",
+      value: cms,
     },
   ],
   properties: {

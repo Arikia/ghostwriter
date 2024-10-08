@@ -16,12 +16,16 @@ export default function Navbar() {
           <a href="/import" className="text-gray-300 hover:text-white">
             Import
           </a>
-          <a href="/about" className="text-gray-300 hover:text-white">
-            About
+          <a href="/briefcase" className="text-gray-300 hover:text-white">
+            Briefcase
           </a>
           <a href="/library" className="text-gray-300 hover:text-white">
             Library
           </a>
+          <a href="/about" className="text-gray-300 hover:text-white">
+            About
+          </a>
+
           <ConnectWallet />
         </div>
       </div>

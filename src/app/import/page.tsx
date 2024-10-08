@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 import classNames from "classnames";
 
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -11,6 +12,7 @@ import { Upload } from "@/components/layout/Upload/Upload";
 import style from "./page.module.css";
 import { ConnectWallet } from "@/components/ui/ConnectWallet";
 import { NFTCard } from "@/components/layout/NFTCard/NFTCard";
+import { CheckboxWithTerms } from "@/components/ui/Checkbox/Checkbox";
 
 type ExportExtract = {
   name: string;
@@ -51,6 +53,7 @@ const Page = () => {
 
   const [fileName, setFileName] = useState<string>("No file selected");
   const [isCreatingMint, setIsCreatingMint] = useState<boolean>(false);
+  const [isTermsAccepted, setIsTermsAccepted] = useState<boolean>(false);
   const userWalletAddress = publicKey ? publicKey.toBase58() : null;
 
   const shortenedData = useMemo(() => {
@@ -65,7 +68,8 @@ const Page = () => {
         title: post.title,
         text: post.text.slice(0, 40).concat("..."),
         published_at: post.published_at,
-        published_where: post.published_where,
+        published_where: "CTRL-X",
+        cms: post.published_where,
       })),
     };
   }, [jsonData]);
@@ -130,8 +134,9 @@ const Page = () => {
         body: JSON.stringify({
           author: jsonData.name,
           user_wallet: userWalletAddress,
-          published_where: "ghost",
+          published_where: "CTRL-X",
           posts: postsToMint,
+          cms: "Ghost",
         }),
       });
 
@@ -163,7 +168,7 @@ const Page = () => {
             image:
               "https://devnet.irys.xyz/D6UumRpJTxu5N4zihuwaDxZDsJkBUE8iAp7d8ZD8nf6f",
             mint: r.nft,
-            explorer_link: `https://solana.fm/address/${r.txString}/transactions?cluster=devnet-alpha`,
+            explorer_link: `https://solana.fm/address/${r.nft}/transactions?cluster=devnet-alpha`,
           })
         );
 
@@ -249,7 +254,8 @@ const Page = () => {
                     id: post.id,
                     title: post.title,
                     published_at: post.published_at,
-                    published_where: "ghost",
+                    published_where: "CTRL-X",
+                    cms: "Ghost",
                     text: post.text,
                   }))
                 : []
@@ -258,10 +264,19 @@ const Page = () => {
             onCheckboxChange={handleCheckboxChange}
             onSelectAll={handleSelectAll}
           />
+          <CheckboxWithTerms
+            term="By checking this box, you declare that you are the original author and lawful rights holder of this content."
+            isChecked={isTermsAccepted}
+            onChange={() => {
+              setIsTermsAccepted((prevState) => !prevState); // toggle
+            }}
+          />
           <Button
             onClick={handleMint}
             loading={isCreatingMint}
-            disabled={isCreatingMint || selectedPostIds.length === 0}
+            disabled={
+              isCreatingMint || selectedPostIds.length === 0 || !isTermsAccepted
+            }
           >
             Mint
           </Button>
@@ -269,6 +284,9 @@ const Page = () => {
       )}
       {currentStep === 3 && (
         <>
+          <h3 className={style.successHeader}>
+            Freshly minted! 🎉 Continue to Briefcase
+          </h3>
           <div className={style.nftCards}>
             {mintedNFTs.map(({ title, image, mint, explorer_link }, index) => (
               <NFTCard
@@ -280,6 +298,9 @@ const Page = () => {
               />
             ))}
           </div>
+          <Link href="/briefcase" passHref>
+            <Button>Go to your briefcase</Button>
+          </Link>
         </>
       )}
     </div>

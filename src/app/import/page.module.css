@@ -72,6 +72,11 @@
   margin-top: 20px;
 }
 
+.successHeader {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
 
 .nftCards {
   width: 80%;
@@ -79,3 +84,4 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
+

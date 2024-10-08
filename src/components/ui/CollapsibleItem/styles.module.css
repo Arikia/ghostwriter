@@ -1,0 +1,46 @@
+/* Container for each collapsible item */
+.collapsibleItem {
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Button that controls the collapsible behavior */
+.collapsibleButton {
+  width: 100%;
+  background-color: #f1f1f1;
+  border: none;
+  text-align: left;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Add hover and focus effect for button */
+.collapsibleButton:hover,
+.collapsibleButton:focus {
+  background-color: #ddd;
+}
+
+/* The collapsible content container */
+.collapsibleContent {
+  max-height: 0; /* Initially collapsed */
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+  opacity: 0; /* Initially invisible */
+}
+
+/* Inner content to prevent padding from being collapsed */
+.innerContent {
+  padding: 10px;
+  background-color: #fafafa;
+  border-top: 1px solid #ccc;
+}
+
+/* Expanded state */
+.collapsibleContent.expanded {
+  opacity: 1; /* Fully visible when expanded */
+  max-height: 1000px; /* A large value to allow for smooth transitions */
+}

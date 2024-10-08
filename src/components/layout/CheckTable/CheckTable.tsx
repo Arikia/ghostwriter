@@ -7,6 +7,7 @@ type RowItem = {
   text: string;
   published_at: string;
   published_where: string;
+  cms: string;
 };
 
 export const CheckTable = ({
@@ -37,6 +38,7 @@ export const CheckTable = ({
             <th className={styles.tableCell}>Title</th>
             <th className={styles.tableCell}>Text</th>
             <th className={styles.tableCell}>Published At</th>
+            <th className={styles.tableCell}>CMS</th>
           </tr>
           <tr>
             <td>
@@ -76,6 +78,7 @@ export const CheckTable = ({
               <td className={styles.tableCell}>
                 {new Date(item.published_at).toLocaleDateString("en-US", {})}
               </td>
+              <td className={styles.tableCell}>{item.cms}</td>
             </tr>
           ))}
         </tbody>
