@@ -9,6 +9,8 @@ import { COLLECTION_PUBKEY, HELIUS_URL } from "@/constants";
 import styles from "./page.module.css";
 
 import { CollapsibleItem } from "@/components/ui/CollapsibleItem/CollapsibleItem";
+import { fetcher } from "../utils/client/fetcher";
+import { getMetadataValue } from "../utils/client/getMetadataValue";
 
 /*
 TODOS:
@@ -33,28 +35,6 @@ interface Article {
 // Component for the entire collapsible list
 type CollapsibleListProps = {
   items: { title: string; content: ReactNode }[];
-};
-
-// item.content.metadata
-const getMetadataValue = (metadata: any, key: string) =>
-  metadata?.attributes?.find((x: any) => x.trait_type === key)?.value;
-
-// Define the fetcher function for SWR
-const fetcher = async (url: string, body: any) => {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch");
-  }
-
-  const data = await response.json();
-  return data.result;
 };
 
 const Page: React.FC = () => {

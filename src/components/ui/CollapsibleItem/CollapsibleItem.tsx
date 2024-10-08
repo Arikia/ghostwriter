@@ -60,6 +60,7 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null); // Reference to the content div
   const [plainText, setPlainText] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -67,8 +68,7 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
 
   const fetchData = async () => {
     try {
-      console.log(encryption);
-      // setLoading(true);
+      setLoading(true);
       const response = await fetch("/api/read", {
         method: "POST",
         headers: {
@@ -87,9 +87,9 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
       const result = await response.json();
       setPlainText(result.plaintext);
     } catch (error) {
-      // setError((error as Error).message);
+      console.error("Failed to fetch data:", error);
     } finally {
-      // setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -147,7 +147,6 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
   // Use effect to fetch data when component mounts
   useEffect(() => {
     if (isExpanded && (isAuthor() || localStorage.getItem(nftId) === "1")) {
-      console.log({ title, nftId }, "FETCHING");
       fetchData();
     }
   }, [isExpanded, localStorage.getItem(nftId)]);
