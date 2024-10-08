@@ -1,5 +1,5 @@
 const RPC = "https://api.devnet.solana.com";
-const COLLECTION_PUBKEY = "EnVg6jgyJk18TbPr8YtZjozLzjUQKR14NaQ2cH8psg1";
+const COLLECTION_PUBKEY = "7dvTzUDjzUrCNMx6vTLPbfaWQNpi5oZxSwhgq3PX44hU";
 const NFT_IMAGE_GH_URL =
   "https://raw.githubusercontent.com/julibi/image-uploads/main/unnamed.png";
 const NFT_IMAGE_AW_URL =
