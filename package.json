@@ -32,7 +32,8 @@
     "react-confetti": "^6.1.0",
     "react-confetti-explosion": "^2.1.2",
     "react-dom": "^18",
-    "react-use": "^17.5.1"
+    "react-use": "^17.5.1",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -38,6 +38,10 @@ const steps = {
   3: "Results",
 };
 
+/* TODO:
+- error handling for when no posts can be processed while uploading
+*/
+
 const Page = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const { connected, wallet, publicKey, sendTransaction } = useWallet();

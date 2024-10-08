@@ -58,32 +58,6 @@
     padding: 20px;
   }
   
-  .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    flex: 1 1 calc(33.333% - 20px); /* Responsive card width */
-    max-width: calc(33.333% - 20px);
-  }
-  
-  .card h2 {
-    font-size: 20px;
-    margin-top: 0;
-  }
-  
-  .card p {
-    margin: 10px 0;
-    color: #555;
-  }
-  
   .button {
     background-color: #487aab;
     color: white;

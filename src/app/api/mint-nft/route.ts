@@ -28,6 +28,7 @@ import {
 import { encryptText } from "@/app/utils/server/encrypt";
 import { createMetadata } from "@/app/utils/server/createMetadata";
 import { uploadNFTImageToArweave } from "@/app/utils/server/uploadToArweave";
+import { COLLECTION_PUBKEY, NFT_IMAGE_AW_URL } from "@/constants";
 
 /* TODO:
 -protect the route with a secret key or sth.
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!process.env.COLLECTION_PUBKEY) {
+    if (!COLLECTION_PUBKEY) {
       return NextResponse.json(
         {
           error:
@@ -103,11 +104,11 @@ export async function POST(req: NextRequest) {
       // Pass and Fetch the Collection
       const collection = await fetchCollection(
         umi,
-        publicKey(process.env.COLLECTION_PUBKEY)
+        publicKey(COLLECTION_PUBKEY)
       );
 
       // Upload ctrl-x icon to arweave
-      let imageUri = process.env.NFT_IMAGE_AW_URL;
+      let imageUri = NFT_IMAGE_AW_URL;
       if (!imageUri) {
         imageUri = await uploadNFTImageToArweave(umi);
       }
