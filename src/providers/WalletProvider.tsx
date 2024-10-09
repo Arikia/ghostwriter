@@ -5,7 +5,10 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 
 // Define the props interface
@@ -18,7 +21,10 @@ export const WalletConnectionProvider: React.FC<
 > = ({ children }) => {
   const endpoint = useMemo(() => "https://api.devnet.solana.com", []);
 
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  const wallets = useMemo(
+    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
+    []
+  );
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>

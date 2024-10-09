@@ -156,7 +156,10 @@ export const CollapsibleItem: React.FC<CollapsibleItemProps> = ({
 
   // Use effect to fetch data when component mounts
   useEffect(() => {
-    if (isExpanded && (isAuthor() || shouldRefetch)) {
+    if (
+      isExpanded &&
+      (isAuthor() || localStorage.getItem(nftId) === "1" || shouldRefetch)
+    ) {
       fetchData();
     }
   }, [isExpanded, isAuthor(), fetchData, shouldRefetch]);
