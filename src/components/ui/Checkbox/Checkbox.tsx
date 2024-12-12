@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import styles from "./styles.module.css";
+import styles from './styles.module.css';
 
 type CheckBoxWithTermsProps = {
   term: string;
@@ -8,11 +8,7 @@ type CheckBoxWithTermsProps = {
   onChange: (isChecked: boolean) => void;
 };
 
-export const CheckboxWithTerms = ({
-  term,
-  isChecked,
-  onChange,
-}: CheckBoxWithTermsProps) => {
+export const CheckboxWithTerms = ({ term, isChecked, onChange }: CheckBoxWithTermsProps) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.checked);
   };
