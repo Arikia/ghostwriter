@@ -2,6 +2,8 @@
 
 ## Project Overview
 
+**Ghost Writer** is a blockchain-based content licensing system that enables decentralized marketplaces for journalism. Smart contracts automate the content licensing process which facilitates secure micropayments for per-article access. The licenses are stored on the Solana blockchain and the text is encrypted and stored off-chain in Arweave. This process creates an immutable record of ownership, access, and usage of journalistic works and unlocks new monetization and distribution streams for journalists. The CTRL+X Ghost Writer accepts content from a Ghost CMS export file in json format, parses the file into discrete articles, and enables the author to declare ownership mint the license as an NFT, and enter the freshly minted assets into a marketplace where they can accept direct payments from readers via web3 transactions. 
+
 **Blocklicense** is a Web3 content licensing registry and relicensing marketplace specifically designed for text-based journalistic content. It enables authors to establish ownership of their work, facilitating downstream licensing transactions that extend these ownership rights with the author’s permission.
 
 **CTRL+X** supports the development of public benefit infrastructure that empowers journalists to continue their vital work while expanding public access to journalistic content. By leveraging content licensing technology, CTRL+X helps maintain the historical record, fosters collaboration among journalists, and enhances monetization opportunities for their work.
@@ -54,9 +56,6 @@ bun dev
 - **Metaplex** - OS NFT protocol for minting and managing NFTs.
 - **Phantom Wallet** - A popular NFT wallet for Solana-based assets.
 
-*(Future Enhancement: 
-Integration with Tiplink for wallet connection. 
-Metaplex - OS NFT protocol for minting and managing NFTs.)*
 
 ## Team
 
