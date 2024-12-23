@@ -50,9 +50,10 @@ bun dev
 
 - **Next.js** - React framework for building user interfaces and use api routes to create the Solana actions for Blink.
 - **TypeScript** - For type safety and code clarity.
-- **Blink (Solana)** - Blockchain link that turns any Solana action into a shareable, metadata-rich link.
 - **Metaplex** - OS NFT protocol for minting and managing NFTs.
+- **Arweave** - Decentralized Web3 storage.
 - **Phantom Wallet** - A popular NFT wallet for Solana-based assets.
+- **SolFlare** - Another popular NFT wallet for Solana-based assets.
 
 
 ## Team
