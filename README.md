@@ -1,4 +1,4 @@
-# Decentralizing the Future of Digital Publishing
+# Import Ghost Archives Protect, Liecnse, and Exchange on the Solana Blockchain
 
 ## Project Overview
 
